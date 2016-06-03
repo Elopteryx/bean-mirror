@@ -1,0 +1,27 @@
+language: java
+
+sudo: required
+
+dist: trusty
+
+group: edge
+
+jdk:
+  - oraclejdk8
+  - oraclejdk9
+
+cache:
+  directories:
+    - $HOME/.gradle
+
+matrix:
+  fast_finish: true
+
+env:
+ - TERM=dumb
+
+script:
+  - ./gradlew build
+
+after_success:
+  - ./gradlew coveralls

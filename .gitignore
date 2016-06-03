@@ -1,0 +1,19 @@
+build/
+target/
+classes/
+.gradle/
+.idea/
+
+# Intellij #
+*.iml
+*.ipr
+*.iws
+
+# Eclipse#
+*.project
+*.classpath
+*.settings
+
+# Compiled source #
+*.class
+*.jar

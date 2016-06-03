@@ -1,0 +1,8 @@
+rootProject.name = "bean-mirror-parent"
+
+include "core"
+include "tests"
+
+findProject(":core")?.name = "bean-mirror"
+findProject(":tests")?.name = "bean-mirror-tests"
+

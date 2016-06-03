@@ -1,0 +1,62 @@
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "com.github.elopteryx"
+            artifactId "bean-mirror"
+
+            from components.java
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
+            }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.scopeMappings.with {
+                addMapping(1, configurations.compileOnly, "provided")
+            }
+
+            pom.project {
+                name "Upload Parser"
+                groupId "com.github.elopteryx"
+                artifactId "bean-mirror"
+
+                description "Upload Parser is an asynchronous file upload library for servlets."
+                url "https://github.com/Elopteryx/bean-mirror"
+
+                scm {
+                    connection "scm:git:git@github.com/Elopteryx/bean-mirror.git"
+                    developerConnection "scm:git:git@github.com/Elopteryx/bean-mirror.git"
+                    url "scm:git:git@github.com/Elopteryx/bean-mirror.git"
+                }
+
+                licenses {
+                    license {
+                        name "The Apache License, Version 2.0"
+                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id "elopteryx"
+                        name "Adam Forgacs"
+                        email "creative.elopteryx@gmail.com"
+                    }
+                }
+            }
+        }
+    }
+}

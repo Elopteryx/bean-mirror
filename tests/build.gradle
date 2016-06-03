@@ -1,0 +1,20 @@
+dependencies {
+
+    /* Reflection library. */
+    testCompile project(":bean-mirror")
+
+    /* Test runner. */
+    testCompile "junit:junit:$junitVersion"
+
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "com.github.elopteryx"
+            artifactId "bean-mirror-tests"
+
+            from components.java
+        }
+    }
+}
