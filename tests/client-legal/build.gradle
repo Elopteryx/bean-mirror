@@ -1,0 +1,22 @@
+dependencies {
+
+    /* Bean Mirror. */
+    compile project(":bean-mirror")
+
+    /* Test module, service provider. */
+    compile project(":tests:server")
+
+    /* Test runner. */
+    testCompile "junit:junit:$junitVersion"
+
+    /* Object mocking. */
+    testCompile "org.mockito:mockito-core:$mockitoVersion"
+
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = 1.9
+    targetCompatibility = 1.9
+    options.fork = true
+    options.forkOptions.javaHome = new File("C:\\Program Files\\Java\\jdk-9")
+}

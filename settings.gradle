@@ -2,7 +2,15 @@ rootProject.name = "bean-mirror-parent"
 
 include "core"
 include "tests"
+include "tests:server"
+include "tests:client-legal"
+include "tests:client-unauthorized"
+include "tests:runner"
 
 findProject(":core")?.name = "bean-mirror"
-findProject(":tests")?.name = "bean-mirror-tests"
+//findProject(":tests")?.name = "bean-mirror-tests"
+//findProject(":tests:server")?.name = "bean-mirror-tests-server"
+//findProject(":tests:client-legal")?.name = "bean-mirror-tests-client-legal"
+//findProject(":tests:client-unauthorized")?.name = "bean-mirror-tests-client-unauthorized"
+//findProject(":tests:runner")?.name = "bean-mirror-tests-runner"
 

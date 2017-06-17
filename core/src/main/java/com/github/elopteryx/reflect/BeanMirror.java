@@ -1,129 +1,116 @@
 package com.github.elopteryx.reflect;
 
-import com.github.elopteryx.reflect.internal.BeanMirrorImpl;
+import com.github.elopteryx.reflect.internal.Accessor;
 
+import java.lang.invoke.MethodHandles.Lookup;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 
 /**
- * A wrapper object created from an {@link Object} or {@link Class} instance.
- * @param <T> The generic type of the wrapped object.
+ * A generic wrapper class for accessing the given instance.
+ * @param <T> The generic type for the current value.
  */
-public interface BeanMirror<T> {
+public class BeanMirror<T> {
 
     /**
-     * Creates a new Mirror instance from the given object.
-     * @param object The object to be wrapped
-     * @param <R> The type of the object
-     * @throws NullPointerException If the object is null
-     * @return A new Mirror instance
+     * The wrapped value. Cannot be null.
      */
-    static <R> BeanMirror<R> of(R object) {
-        try {
-            return new BeanMirrorImpl<>(Objects.requireNonNull(object));
-        } catch (Exception e) {
-            return new BeanMirrorImpl<>(BeanMirrorImpl.EMPTY, e);
-        }
+    private final T object;
+
+    /**
+     * The accessor used to reflect into the
+     * properties of the value.
+     */
+    private final Accessor accessor;
+
+    private BeanMirror(T object, Accessor accessor) {
+        this.object = object;
+        this.accessor = accessor;
     }
 
-    /**
-     * Creates a new Mirror instance from the given object.
-     * @param clazz The class object to be wrapped
-     * @param <R> The type of the object
-     * @throws NullPointerException If the object is null
-     * @return A new Mirror instance
-     */
-    static <R> BeanMirror<R> of(Class<R> clazz) {
-        try {
-            return new BeanMirrorImpl<>(Objects.requireNonNull(clazz));
-        } catch (Exception e) {
-            return new BeanMirrorImpl<>(BeanMirrorImpl.EMPTY, e);
-        }
+    public static <R> BeanMirror<R> of(R object) {
+        Objects.requireNonNull(object);
+        return new BeanMirror<>(object, new Accessor(null));
     }
 
-    static BeanMirror<Object> of(String className) {
-        try {
-            return new BeanMirrorImpl<>((Class<Object>) Class.forName(className));
-        } catch (ClassNotFoundException e) {
-            return new BeanMirrorImpl<>(BeanMirrorImpl.EMPTY, e);
-        }
+    public static <R> BeanMirror<R> of(R object, Lookup lookup) {
+        Objects.requireNonNull(object);
+        return new BeanMirror<>(object, new Accessor(lookup));
     }
 
-    // Constructors
+    // VALUE
 
-    /**
-     * Creates a new instance from the wrapped object or class instance.
-     * @param args The constructor arguments to be used
-     * @return A new Mirror instance wrapping the newly created object
-     */
-    BeanMirror<T> construct(Object... args);
+    public T get() {
+        return object;
+    }
 
+    public Class<?> type() {
+        return object instanceof Class ? (Class<?>)object : object.getClass();
+    }
 
-    // Current value
+    // CONSTRUCTORS
 
-    /**
-     * Returns the currently wrapped value as an optional. The given value can be missing
-     * if the Mirror was created from a field value or a method invocation.
-     * @return An optional, possibly empty
-     */
-    Optional<T> value();
+    public BeanMirror<T> create(Object... args) {
+        @SuppressWarnings("unchecked")
+        final T result = (T)accessor.useConstructor(type(), args);
+        Objects.requireNonNull(result, "");
+        return new BeanMirror<>(result, accessor);
+    }
 
-    /**
-     * Returns the value of the field identified with the given name as an optional. Because
-     * of the missing type information the generic type is widened to Object.
-     * @param fieldName The name of the field
-     * @return An optional, possibly empty if the field has null value
-     */
-    Optional<Object> value(String fieldName);
+    // FIELDS
 
-    /**
-     * Returns the value of the field identified with the given name as an optional.
-     * The Optional will get the type information from the given class instance.
-     * @param fieldName The name of the field
-     * @param fieldClass The known class of the field
-     * @throws ClassCastException If the classes do not match
-     * @return An optional, possibly empty if the field has null value
-     */
-    <R> Optional<R> value(String fieldName, Class<R> fieldClass);
+    public Object get(String name) {
+        return field(name).get();
+    }
 
-    /**
-     * Returns the class of the currently wrapped instance.
-     * @return The available type information
-     */
-    Class<T> type();
+    public <R> R get(String name, Class<R> clazz) {
+        return field(name, clazz).get();
+    }
 
+    public BeanMirror<T> set(String name, Object value) {
+        accessor.setField(object, name, value);
+        return this;
+    }
 
-    // Fields
+    public BeanMirror<Object> field(String name) {
+        return field(name, Object.class);
+    }
 
-    BeanMirror<T> set(String fieldName, Object value);
+    public <R> BeanMirror<R> field(String name, Class<R> clazz) {
+        final Object result = accessor.getField(object, name);
+        Objects.requireNonNull(result, "");
+        return new BeanMirror<>(clazz.cast(result), accessor);
+    }
 
-    BeanMirror<Object> field(String fieldName);
+    // METHODS
 
-    <R> BeanMirror<R> field(String fieldName, Class<R> fieldClass);
+    public BeanMirror<T> run(String name, Object... args) {
+        accessor.callMethod(object, name, args);
+        return this;
+    }
 
+    public BeanMirror<Object> call(String name, Object... args) {
+        return call(Object.class, name, args);
+    }
 
+    public <R> BeanMirror<R> call(Class<R> clazz, String name, Object... args) {
+        final Object result = accessor.callMethod(object, name, args);
+        Objects.requireNonNull(result, "");
+        return new BeanMirror<>(clazz.cast(result), accessor);
+    }
 
-    // Methods
+    @Override
+    public int hashCode() {
+        return object.hashCode();
+    }
 
-    BeanMirror<T> invoke(String methodName, Object... args);
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BeanMirror && object.equals(((BeanMirror) obj).get());
+    }
 
-    BeanMirror<Object> method(String methodName, Object... args);
-
-    <R> BeanMirror<R> method(String methodName, Class<R> methodReturnValueClass, Object... args);
-
-
-    // State
-
-    boolean isSuccess();
-
-    boolean isFailure();
-
-    T orElse(T other);
-
-    T orElseThrow() throws Exception;
-
-    <X extends Exception> T orElseThrow(Function<Exception, ? extends X> function) throws X;
-
+    @Override
+    public String toString() {
+        return object.toString();
+    }
 
 }

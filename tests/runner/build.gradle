@@ -1,0 +1,39 @@
+dependencies {
+
+    /* Bean Mirror. */
+    testCompile project(":bean-mirror")
+
+    /* Test module, service provider. */
+    testCompile project(":tests:server")
+
+    /* Test module, client with legal access. */
+    testCompile project(":tests:client-legal")
+
+    /* Test module, client with no authorized access. */
+    testCompile project(":tests:client-unauthorized")
+
+    /* Test runner. */
+    testCompile "junit:junit:$junitVersion"
+
+    /* Object mocking. */
+    testCompile "org.mockito:mockito-core:$mockitoVersion"
+
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "com.github.elopteryx"
+            artifactId "bean-mirror-tests-runner"
+
+            from components.java
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = 1.9
+    targetCompatibility = 1.9
+    options.fork = true
+    options.forkOptions.javaHome = new File("C:\\Program Files\\Java\\jdk-9")
+}

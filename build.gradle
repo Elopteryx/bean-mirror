@@ -1,6 +1,6 @@
 plugins {
-    id "com.github.ben-manes.versions" version "0.12.0"
-    id "com.github.kt3k.coveralls" version "2.6.3"
+    id "com.github.ben-manes.versions" version "0.14.0"
+    id "com.github.kt3k.coveralls" version "2.8.1"
 }
 
 apply plugin: "com.github.kt3k.coveralls"
@@ -34,11 +34,14 @@ subprojects {
 
     ext {
         junitVersion = "4.12"
+        mockitoVersion = "2.7.22"
     }
 
     tasks.withType(JavaCompile) {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 1.9
+        targetCompatibility = 1.9
+        options.fork = true
+        options.forkOptions.javaHome = new File("C:\\Program Files\\Java\\jdk-9")
     }
 
     task javadocJar(type: Jar) {
@@ -51,14 +54,17 @@ subprojects {
             configure(options) {
                 windowTitle "Bean Mirror API Documentation"
                 docTitle "Bean Mirror API Documentation"
-                bottom 'Copyright &#169; 2016 <a href="https://github.com/Elopteryx">Creative Elopteryx</a>'
+                bottom 'Copyright &#169; 2017 <a href="https://github.com/Elopteryx">Creative Elopteryx</a>'
                 breakIterator true
                 author false
                 source "1.8"
                 encoding "UTF-8"
                 docEncoding "UTF-8"
-                failOnError false
-                links "http://download.oracle.com/javase/8/docs/api/"
+                failOnError true
+                links = [
+                        "http://download.oracle.com/javase/8/docs/api/",
+                        "http://download.oracle.com/javaee/7/api/",
+                ]
             }
         }
     }
@@ -75,7 +81,7 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion = "6.17"
+        toolVersion = "7.6.1"
         configFile = new File("${projectDir}/../config/checkstyle/checkstyle.xml")
     }
 
@@ -86,6 +92,7 @@ subprojects {
 
     test {
         testLogging.showStandardStreams = true
+        executable = new File("C:\\Program Files\\Java\\jdk-9\\bin\\java.exe")
     }
 
     tasks.withType(Test) {
@@ -93,7 +100,7 @@ subprojects {
         jacoco {
             append true
             destinationFile file("${rootDir}/build/jacoco/jacocoTest.exec")
-            classDumpFile file("${rootDir}/build/jacoco/classpathdumps")
+            classDumpDir file("${rootDir}/build/jacoco/classpathdumps")
         }
     }
 }

@@ -1,3 +1,12 @@
+sourceSets {
+    main {
+        java {
+            srcDirs "src/main/java"
+            srcDirs "src/main/java9"
+        }
+    }
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -29,11 +38,11 @@ uploadArchives {
             }
 
             pom.project {
-                name "Upload Parser"
+                name "Bean Mirror"
                 groupId "com.github.elopteryx"
                 artifactId "bean-mirror"
 
-                description "Upload Parser is an asynchronous file upload library for servlets."
+                description "Bean Mirror is a reflection library."
                 url "https://github.com/Elopteryx/bean-mirror"
 
                 scm {
