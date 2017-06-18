@@ -4,6 +4,7 @@ import com.github.elopteryx.reflect.internal.Accessor;
 
 import java.lang.invoke.MethodHandles.Lookup;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A generic wrapper class for accessing the given instance.
@@ -12,7 +13,7 @@ import java.util.Objects;
 public class BeanMirror<T> {
 
     /**
-     * The wrapped value. Cannot be null.
+     * The wrapped value. Can be null.
      */
     private final T object;
 
@@ -32,7 +33,7 @@ public class BeanMirror<T> {
         return new BeanMirror<>(object, new Accessor(null));
     }
 
-    public static <R> BeanMirror<R> of(R object, Lookup lookup) {
+    public BeanMirror<T> withLookup(Lookup lookup) {
         Objects.requireNonNull(object);
         return new BeanMirror<>(object, new Accessor(lookup));
     }
@@ -58,12 +59,12 @@ public class BeanMirror<T> {
 
     // FIELDS
 
-    public Object get(String name) {
-        return field(name).get();
+    public Optional<Object> get(String name) {
+        return Optional.ofNullable(field(name).get());
     }
 
-    public <R> R get(String name, Class<R> clazz) {
-        return field(name, clazz).get();
+    public <R> Optional<R> get(String name, Class<R> clazz) {
+        return Optional.ofNullable(field(name, clazz).get());
     }
 
     public BeanMirror<T> set(String name, Object value) {
