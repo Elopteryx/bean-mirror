@@ -1,10 +1,16 @@
 dependencies {
 
     /* Bean Mirror. */
-    compile project(":core")
+    compile project(":bean-mirror")
 
     /* Test module, service provider. */
     compile project(":tests:server")
+
+    /* Test runner. */
+    testCompile "junit:junit:$junitVersion"
+
+    /* Object mocking. */
+    testCompile "org.mockito:mockito-core:$mockitoVersion"
 
 }
 

@@ -1,10 +1,18 @@
 package com.github.elopteryx.reflect;
 
+import com.github.elopteryx.reflect.function.LongGetter;
 import com.github.elopteryx.reflect.internal.Accessor;
 
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.LongSupplier;
 
 /**
  * A generic wrapper class for accessing the given instance.
@@ -13,12 +21,12 @@ import java.util.Optional;
 public class BeanMirror<T> {
 
     /**
-     * The wrapped value. Can be null.
+     * The wrapped value. Cannot be null.
      */
     private final T object;
 
     /**
-     * The accessor used to reflect into the
+     * The accessor used to hack into the
      * properties of the value.
      */
     private final Accessor accessor;
@@ -30,10 +38,10 @@ public class BeanMirror<T> {
 
     public static <R> BeanMirror<R> of(R object) {
         Objects.requireNonNull(object);
-        return new BeanMirror<>(object, new Accessor(null));
+        return new BeanMirror<>(object, new Accessor(null)); // FIXME What about own lookup?
     }
 
-    public BeanMirror<T> withLookup(Lookup lookup) {
+    public static <R> BeanMirror<R> of(R object, Lookup lookup) {
         Objects.requireNonNull(object);
         return new BeanMirror<>(object, new Accessor(lookup));
     }
@@ -59,12 +67,69 @@ public class BeanMirror<T> {
 
     // FIELDS
 
-    public Optional<Object> get(String name) {
-        return Optional.ofNullable(field(name).get());
+    public Object get(String name) {
+        return field(name).get();
     }
 
-    public <R> Optional<R> get(String name, Class<R> clazz) {
-        return Optional.ofNullable(field(name, clazz).get());
+    public <R> R get(String name, Class<R> clazz) {
+        return field(name, clazz).get();
+    }
+
+    public <T> LongGetter<T> getterForLong1(String name, MethodHandles.Lookup lookup) {
+
+        try {
+            final Field f = object.getClass().getDeclaredField(name);
+            if (!long.class.isAssignableFrom(f.getType()))
+                throw new RuntimeException("Field is not of expected type");
+
+            return (obj) -> {
+                try {
+                    return f.getLong(obj);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (NoSuchFieldException e) {
+            throw new BeanMirrorException(e);
+        }
+    }
+
+    public LongGetter getterForLong(String name, MethodHandles.Lookup lookup) {
+        try {
+            final Field f = object.getClass().getDeclaredField(name);
+            MethodHandle get = lookup.findVirtual(Field.class, "getLong",
+                    MethodType.methodType(long.class, Object.class));
+            //lookup.unreflectVarHandle(f).get()
+            MethodHandle factory = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    //get.type().changeReturnType(LongGetter.class),
+                    MethodType.methodType(LongGetter.class, Field.class),
+                    MethodType.methodType(long.class),
+                    get,
+                    MethodType.methodType(long.class)
+            ).getTarget();
+            factory = factory.bindTo(f);
+            return (LongGetter) factory.invoke(object);
+            //return (LongGetter) factory.invoke(f, Modifier.isStatic(f.getModifiers())? null: object);
+
+
+
+            //final MethodHandle getterHandle = lookup.unreflectGetter(object.getClass().getDeclaredField(name));
+            //final MethodHandle getterHandle = lookup.findGetter(object.getClass(), name, long.class);
+            //return PrivateTargetLambdaWorking.getterLambdaLong(lookup, getterHandle);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    public <R> Function<T, R> getter(String name) {
+        try {
+            final MethodHandle getterHandle = MethodHandles.lookup().unreflect(object.getClass().getDeclaredMethod("getValue"));
+            return PrivateTargetLambdaWorking.getterLambda2(MethodHandles.lookup(), getterHandle);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
     }
 
     public BeanMirror<T> set(String name, Object value) {

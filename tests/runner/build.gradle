@@ -1,7 +1,7 @@
 dependencies {
 
     /* Bean Mirror. */
-    testCompile project(":core")
+    testCompile project(":bean-mirror")
 
     /* Test module, service provider. */
     testCompile project(":tests:server")
@@ -13,8 +13,7 @@ dependencies {
     testCompile project(":tests:client-unauthorized")
 
     /* Test runner. */
-    //testCompile "junit:junit:$junitVersion"
-    testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testCompile "junit:junit:$junitVersion"
 
     /* Object mocking. */
     testCompile "org.mockito:mockito-core:$mockitoVersion"

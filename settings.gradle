@@ -7,7 +7,7 @@ include "tests:client-legal"
 include "tests:client-unauthorized"
 include "tests:runner"
 
-//findProject(":core")?.name = "bean-mirror"
+findProject(":core")?.name = "bean-mirror"
 //findProject(":tests")?.name = "bean-mirror-tests"
 //findProject(":tests:server")?.name = "bean-mirror-tests-server"
 //findProject(":tests:client-legal")?.name = "bean-mirror-tests-client-legal"

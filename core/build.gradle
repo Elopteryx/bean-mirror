@@ -7,15 +7,13 @@ sourceSets {
     }
 }
 
-jar {
-    manifest {
-        attributes(
-                "Created-By": "Creative Elopteryx",
-                "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
-                "Automatic-Module-Name": "com.github.elopteryx.reflect",
-                "Implementation-Version": version
-        )
-    }
+dependencies {
+    testCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
+    testCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+
+    testCompile "com.hervian:lambda-factory:2.0.2-SNAPSHOT"
+
+    
 }
 
 publishing {

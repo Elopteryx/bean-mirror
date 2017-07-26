@@ -1,11 +1,10 @@
 dependencies {
 
     /* Bean Mirror. */
-    testCompile project(":core")
+    testCompile project(":bean-mirror")
 
     /* Test runner. */
-    //testCompile "junit:junit:$junitVersion"
-    testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testCompile "junit:junit:$junitVersion"
 
     /* Object mocking. */
     testCompile "org.mockito:mockito-core:$mockitoVersion"

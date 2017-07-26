@@ -6,6 +6,8 @@ public class Server {
 
     private String internalName = "$$INTERNAL$$";
 
+    private long value = 4;
+
     public Server(String name) {
         this.name = name;
     }

@@ -11,7 +11,7 @@ public class UnAuthorizedClient {
 
         final Server server = new Server("server");
 
-        BeanMirror<Server> mirror = BeanMirror.of(server).withLookup(MethodHandles.lookup());
+        BeanMirror<Server> mirror = BeanMirror.of(server, MethodHandles.lookup());
 
         System.out.println(mirror.field("internalName", String.class).get());
         mirror.set("internalName", "Not so internal.");

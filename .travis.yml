@@ -1,27 +1,20 @@
 language: java
-sudo: false
+
+sudo: required
+
 dist: trusty
+
+group: edge
+
+jdk:
+  - oraclejdk8
 
 cache:
   directories:
     - $HOME/.gradle
 
 matrix:
-  include:
-    - jdk: oraclejdk8
-      addons: {apt: {packages: [oracle-java8-installer]}}
-    - jdk: oraclejdk9
-      before_install:
-        - cd ~
-        - wget http://download.java.net/java/jdk9/archive/174/binaries/jdk-9-ea+174_linux-x64_bin.tar.gz
-        - tar -xzf jdk-9-ea+174_linux-x64_bin.tar.gz
-        - export JAVA_HOME=~/jdk-9
-        - PATH=$JAVA_HOME/bin:$PATH
-        - cd -
-      env:
-        - JDK_JAVA_OPTIONS='--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED'
-install:
-  - ./gradlew -version
+  fast_finish: true
 
 env:
  - TERM=dumb

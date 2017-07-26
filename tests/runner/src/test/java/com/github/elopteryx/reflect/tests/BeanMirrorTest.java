@@ -1,20 +1,19 @@
 package com.github.elopteryx.reflect.tests;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.company.client.legal.LegalClient;
 import com.company.client.unauthorized.UnAuthorizedClient;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class BeanMirrorTest {
+public class BeanMirrorTest {
 
     @Test
-    void legalAccess() throws Exception {
+    public void legalAccess() throws Exception {
         LegalClient.main();
     }
 
-    @Test
-    void unauthorizedAccess() throws Exception {
-        assertThrows(IllegalAccessException.class, UnAuthorizedClient::main);
+    @Test(expected = IllegalAccessException.class)
+    public void unauthorizedAccess() throws Exception {
+        UnAuthorizedClient.main();
     }
 }
