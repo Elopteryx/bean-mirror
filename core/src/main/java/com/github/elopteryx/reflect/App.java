@@ -1,47 +1,43 @@
 package com.github.elopteryx.reflect;
 
-import com.github.elopteryx.reflect.function.LongGetter;
-
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class App {
 
-    public static class Target {
-        private long value = 3;
+    public static class Base {
+        protected char a = 'a';
     }
 
-    static final MethodHandles.Lookup trusted;
+    public static class Target extends Base {
+        private static Long value = 3L;
+        protected char b = 'b';
+    }
 
-    static {
-        try {
-            final MethodHandles.Lookup original = MethodHandles.lookup();
-            final Field internal = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
-            internal.setAccessible(true);
-            trusted = (MethodHandles.Lookup) internal.get(original);
-        } catch (final Throwable e) {
-            throw new RuntimeException("Missing trusted lookup", e);
-        }
+    public static class Child extends Target {
+        protected char c = 'c';
     }
 
     public static void main(String... args) throws Exception {
 
-        final Queue<Integer> queue = new PriorityQueue<>();
-        queue.add(3);
-        queue.add(1);
-        queue.add(2);
-
-        System.out.println(queue.poll());
-        System.out.println(queue.peek());
-        System.out.println(queue.peek());
-
         final Target target = new Target();
         final MethodHandles.Lookup lookup = MethodHandles.lookup();
-        final LongGetter<Target> getter = BeanMirror.of(target, trusted).getterForLong("value", lookup);
+        final BeanMirror<Target> beanMirror = BeanMirror.of(target, lookup);
+        final Function<Target, Character> getter = beanMirror.createGetter("b", char.class);
+        final Supplier<Long> staticGetter = beanMirror.createStaticGetter("value", Long.class);
 
         System.out.println(getter.apply(target));
+        System.out.println(staticGetter.get());
+
+
+        final Child child = new Child();
+
+        final BeanMirror<Child> castedMirror = BeanMirror.of(child, lookup);
+        System.out.println(castedMirror.asType(Base.class).createGetter("a", char.class).apply(child));
+        System.out.println(castedMirror.asType(Child.class).createGetter("c", char.class).apply(child));
+
+        final Child newChild = BeanMirror.of(Child.class, lookup).create().get();
 
     }
 
