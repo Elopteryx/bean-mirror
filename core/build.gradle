@@ -10,10 +10,6 @@ sourceSets {
 dependencies {
     testCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
     testCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
-
-    testCompile "com.hervian:lambda-factory:2.0.2-SNAPSHOT"
-
-    
 }
 
 publishing {

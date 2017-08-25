@@ -12,19 +12,24 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.lang.invoke.MethodType.methodType;
 
-public class Accessor {
+public class AccessorImpl implements Accessor {
 
     private final Lookup lookup;
 
-    public Accessor(Lookup lookup) {
+    AccessorImpl(Lookup lookup) {
         this.lookup = lookup;
     }
 
     //CONSTRUCTORS
 
+    @Override
     public Object useConstructor(Class<?> clazz, Object... args) {
         try {
             final Class<?>[] types = types(args);
@@ -41,21 +46,20 @@ public class Accessor {
 
     // FIELDS
 
-    public Object getField(Object object, String fieldName)  {
+    @Override
+    public Object getField(Object object, String fieldName, Class<?> fieldType) {
         try {
             final Class<?> clazz = object.getClass();
-            final Field field = clazz.getDeclaredField(fieldName);
-
             final Lookup privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
-            final VarHandle handle = privateLookup.unreflectVarHandle(field);
-
-            return handle.get(object);
+            final VarHandle varHandle = privateLookup.findVarHandle(clazz, fieldName, fieldType);
+            return varHandle.get(object);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void setField(Object object, String fieldName, Object value) {
+    @Override
+    public void setField(Object object, String fieldName, Class<?> fieldType, Object value) {
         try {
             final Class<?> clazz = object.getClass();
             final Field field = clazz.getDeclaredField(fieldName);
@@ -69,8 +73,109 @@ public class Accessor {
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> Function<T, R> createGetter(Object target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final VarHandle varHandle = lookupToUse.findVarHandle(type, name, clazz);
+            final Class<R> classToUse = (Class<R>) Accessor.wrapper(clazz);
+            return obj -> classToUse.cast(varHandle.get(obj));
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> Supplier<R> createStaticGetter(Class<T> target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final VarHandle varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
+            final Class<R> classToUse = (Class<R>) Accessor.wrapper(clazz);
+            return () -> classToUse.cast(varHandle.get());
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    @Override
+    public <T, R> BiConsumer<T, R> createSetter(Object target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final VarHandle varHandle = lookupToUse.findVarHandle(type, name, clazz);
+            return varHandle::set;
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    @Override
+    public <T, R> Consumer<R> createStaticSetter(Class<T> target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final VarHandle varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
+            return varHandle::set;
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
     // METHODS
 
+    @Override
+    public void runMethod(Object object, String name, Object... args) throws BeanMirrorException {
+        try {
+            final Class<?> clazz = type(object);
+            final Class<?>[] types = types(args);
+
+            final Lookup privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
+            final Method method = findMethod(object, name, types);
+            final MethodHandle methodHandle = privateLookup.unreflect(method);
+
+            final Object[] targetWithArgs = new Object[args.length + 1];
+            targetWithArgs[0] = object;
+            System.arraycopy(args, 0, targetWithArgs, 1, args.length);
+
+            methodHandle.invokeWithArguments(targetWithArgs);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public Object callMethod(Object object, String name, Object... args) {
         try {
             final Class<?> clazz = type(object);
@@ -181,7 +286,7 @@ public class Accessor {
                 if (actualTypes[i] == NULL.class)
                     continue;
 
-                if (wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i])))
+                if (Accessor.wrapper(declaredTypes[i]).isAssignableFrom(Accessor.wrapper(actualTypes[i])))
                     continue;
 
                 return false;
@@ -232,38 +337,6 @@ public class Accessor {
         }
 
         return accessible;
-    }
-
-    /**
-     * Get a wrapper type for a primitive type, or the argument type itself, if
-     * it is not a primitive type.
-     */
-    public static Class<?> wrapper(Class<?> type) {
-        if (type == null) {
-            return null;
-        } else if (type.isPrimitive()) {
-            if (boolean.class == type) {
-                return Boolean.class;
-            } else if (int.class == type) {
-                return Integer.class;
-            } else if (long.class == type) {
-                return Long.class;
-            } else if (short.class == type) {
-                return Short.class;
-            } else if (byte.class == type) {
-                return Byte.class;
-            } else if (double.class == type) {
-                return Double.class;
-            } else if (float.class == type) {
-                return Float.class;
-            } else if (char.class == type) {
-                return Character.class;
-            } else if (void.class == type) {
-                return Void.class;
-            }
-        }
-
-        return type;
     }
 
     private static class NULL {}

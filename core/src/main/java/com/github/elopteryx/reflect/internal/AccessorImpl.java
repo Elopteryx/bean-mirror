@@ -10,23 +10,28 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-public class AccessorOld {
+public class AccessorImpl implements Accessor {
 
     @SuppressWarnings("unused")
-    public AccessorOld(Lookup lookup) {
+    AccessorImpl(Lookup lookup) {
         // Unused, only for compatibility.
     }
 
     // CONSTRUCTORS
 
+    @Override
     public Object useConstructor(Class<?> clazz, Object... args) {
-        Class<?>[] types = types(args);
+        final Class<?>[] types = types(args);
 
         // Try invoking the "canonical" constructor, i.e. the one with exact
         // matching argument types
         try {
-            Constructor<?> constructor = clazz.getDeclaredConstructor(types);
+            final Constructor<?> constructor = clazz.getDeclaredConstructor(types);
             return useConstructorInternal(constructor, args);
         }
 
@@ -56,7 +61,8 @@ public class AccessorOld {
 
     // FIELDS
 
-    public Object getField(Object object, String name) {
+    @Override
+    public Object getField(Object object, String name, Class<?> fieldType) {
         try {
             Field field = getFieldInternal(object, name);
             if ((field.getModifiers() & Modifier.FINAL) == Modifier.FINAL) {
@@ -70,7 +76,8 @@ public class AccessorOld {
         }
     }
 
-    public void setField(Object object, String name, Object value) {
+    @Override
+    public void setField(Object object, String name, Class<?> fieldType, Object value) {
         try {
             Field field = getFieldInternal(object, name);
             if ((field.getModifiers() & Modifier.FINAL) == Modifier.FINAL) {
@@ -104,8 +111,120 @@ public class AccessorOld {
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> Function<T, R> createGetter(Object target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            if (Modifier.isPrivate(modifiers) && !field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            final Class<R> classToUse = (Class<R>) Accessor.wrapper(clazz);
+            return obj -> {
+                try {
+                    return classToUse.cast(field.get(obj));
+                } catch (IllegalAccessException e) {
+                    throw new BeanMirrorException(e);
+                }
+            };
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> Supplier<R> createStaticGetter(Class<T> target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            if (Modifier.isPrivate(modifiers) && !field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            final Class<R> classToUse = (Class<R>) Accessor.wrapper(clazz);
+            return () -> {
+                try {
+                    return classToUse.cast(field.get(null));
+                } catch (IllegalAccessException e) {
+                    throw new BeanMirrorException(e);
+                }
+            };
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    @Override
+    public <T, R> BiConsumer<T, R> createSetter(Object target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            if (Modifier.isPrivate(modifiers) && !field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            return (obj, value) -> {
+                try {
+                    field.set(obj, value);
+                } catch (IllegalAccessException e) {
+                    throw new BeanMirrorException(e);
+                }
+            };
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    @Override
+    public <T, R> Consumer<R> createStaticSetter(Class<T> target, String name, Class<R> clazz) {
+        try {
+            final Class<?> type = type(target);
+            final Field field = type.getDeclaredField(name);
+            final int modifiers = field.getModifiers();
+            if (Modifier.isPrivate(modifiers) && !field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            return value -> {
+                try {
+                    field.set(null, value);
+                } catch (IllegalAccessException e) {
+                    throw new BeanMirrorException(e);
+                }
+            };
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
     // METHODS
 
+    @Override
+    public void runMethod(Object object, String name, Object... args) throws BeanMirrorException {
+        Class<?>[] types = types(args);
+
+        // Try invoking the "canonical" method, i.e. the one with exact
+        // matching argument types
+        try {
+            Method method = exactMethod(object, name, types);
+            callMethodInternal(method, object, args);
+        }
+
+        // If there is no exact match, try to find a method that has a "similar"
+        // signature if primitive argument types are converted to their wrappers
+        catch (NoSuchMethodException e) {
+            try {
+                Method method = similarMethod(object, name, types);
+                callMethodInternal(method, object, args);
+            } catch (NoSuchMethodException e1) {
+                throw new BeanMirrorException(e1);
+            }
+        }
+    }
+
+    @Override
     public Object callMethod(Object object, String name, Object... args) throws BeanMirrorException {
         Class<?>[] types = types(args);
 
@@ -227,7 +346,7 @@ public class AccessorOld {
                 if (actualTypes[i] == NULL.class)
                     continue;
 
-                if (wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i])))
+                if (Accessor.wrapper(declaredTypes[i]).isAssignableFrom(Accessor.wrapper(actualTypes[i])))
                     continue;
 
                 return false;
@@ -285,38 +404,6 @@ public class AccessorOld {
         }
 
         return accessible;
-    }
-
-    /**
-     * Get a wrapper type for a primitive type, or the argument type itself, if
-     * it is not a primitive type.
-     */
-    public static Class<?> wrapper(Class<?> type) {
-        if (type == null) {
-            return null;
-        } else if (type.isPrimitive()) {
-            if (boolean.class == type) {
-                return Boolean.class;
-            } else if (int.class == type) {
-                return Integer.class;
-            } else if (long.class == type) {
-                return Long.class;
-            } else if (short.class == type) {
-                return Short.class;
-            } else if (byte.class == type) {
-                return Byte.class;
-            } else if (double.class == type) {
-                return Double.class;
-            } else if (float.class == type) {
-                return Float.class;
-            } else if (char.class == type) {
-                return Character.class;
-            } else if (void.class == type) {
-                return Void.class;
-            }
-        }
-
-        return type;
     }
 
     private static class NULL {}

@@ -15,6 +15,10 @@ dependencies {
     /* Test runner. */
     testCompile "junit:junit:$junitVersion"
 
+    // https://mvnrepository.com/artifact/org.junit.platform/junit-platform-commons
+    testCompile group: 'org.junit.platform', name: 'junit-platform-commons', version: '1.0.0-RC3'
+
+
     /* Object mocking. */
     testCompile "org.mockito:mockito-core:$mockitoVersion"
 

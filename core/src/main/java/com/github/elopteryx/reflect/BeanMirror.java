@@ -2,13 +2,7 @@ package com.github.elopteryx.reflect;
 
 import com.github.elopteryx.reflect.internal.Accessor;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.MethodType;
-import java.lang.invoke.VarHandle;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -34,47 +28,39 @@ public class BeanMirror<T> {
     private final Class<? super T> superType;
 
     /**
-     * The lookup  object used for access
-     * checking by the JVM. It must be supplied
-     * from the client code.
-     */
-    private final Lookup lookup;
-
-    /**
      * The accessor used to hack into the
-     * properties of the value.
+     * properties of the value. Uses the
+     * lookup object which must be supplied
+     * from the client code.
      */
     private final Accessor accessor;
 
-    private BeanMirror(T object, Lookup lookup) {
+    private BeanMirror(T object, Accessor accessor) {
         this.object = object;
-        this.accessor = null;
+        this.accessor = accessor;
         this.superType = null;
-        this.lookup = lookup;
     }
 
-    private BeanMirror(T object, Class<? super T> superType, Lookup lookup) {
+    private BeanMirror(T object, Class<? super T> superType, Accessor accessor) {
         this.object = object;
         this.superType = superType;
-        this.lookup = lookup;
-        this.accessor = null;
+        this.accessor = accessor;
     }
 
-    private BeanMirror(Class<T> object, Lookup lookup, Class<? super T> superType) {
+    private BeanMirror(Class<T> object, Accessor accessor, Class<? super T> superType) {
         this.object = object;
         this.superType = superType;
-        this.lookup = lookup;
-        this.accessor = null;
+        this.accessor = accessor;
     }
 
     public static <R> BeanMirror<R> of(R object, Lookup lookup) {
         Objects.requireNonNull(object);
-        return new BeanMirror<>(object, null, lookup);
+        return new BeanMirror<>(object, null, Accessor.of(lookup));
     }
 
     public static <R> BeanMirror<R> of(Class<R> clazz, Lookup lookup) {
         Objects.requireNonNull(clazz);
-        return new BeanMirror<>(clazz, lookup, null);
+        return new BeanMirror<>(clazz, Accessor.of(lookup), null);
     }
 
     // TYPE
@@ -83,13 +69,13 @@ public class BeanMirror<T> {
     public <R> BeanMirror<R> asType(Class<R> clazz) {
         if (object instanceof Class) {
             if (clazz.isAssignableFrom((Class)object)) {
-                return new BeanMirror<>((Class<R>)object, lookup, clazz);
+                return new BeanMirror<>((Class<R>)object, accessor, clazz);
             } else {
                 throw new IllegalArgumentException("Not a supertype!");
             }
         } else {
             if (clazz.isAssignableFrom(object.getClass())) {
-                return new BeanMirror<>((R)object, clazz, lookup);
+                return new BeanMirror<>((R)object, clazz, accessor);
             } else {
                 throw new IllegalArgumentException("Not a supertype!");
             }
@@ -115,109 +101,60 @@ public class BeanMirror<T> {
     public BeanMirror<T> create(Object... args)  {
         final T result;
         try {
-            result = (T)lookup.findConstructor(type(), MethodType.methodType(void.class)).invoke();
+            result = (T)accessor.useConstructor(type(), args);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
-        Objects.requireNonNull(result, "");
-        return new BeanMirror<>(result, lookup);
+        return new BeanMirror<>(result, accessor);
     }
 
     // FIELDS
-
-    public Object get(String name) {
-        return field(name).get();
-    }
 
     public <R> R get(String name, Class<R> clazz) {
         return field(name, clazz).get();
     }
 
-    @SuppressWarnings("unchecked")
-    public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
-        try {
-            final Field field = type().getDeclaredField(name);
-            final int modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type(), lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final VarHandle varHandle = lookupToUse.findVarHandle(type(), name, clazz);
-            final Class<R> classToUse = (Class<R>)Accessor.wrapper(clazz);
-            return obj -> classToUse.cast(varHandle.get(obj));
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
-        try {
-            final Field field = type().getDeclaredField(name);
-            final int modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type(), lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final VarHandle varHandle = lookupToUse.findStaticVarHandle(type(), name, clazz);
-            final Class<R> classToUse = (Class<R>)Accessor.wrapper(clazz);
-            return () -> classToUse.cast(varHandle.get());
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
-    public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
-        try {
-            final Field field = type().getDeclaredField(name);
-            final int modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type(), lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final VarHandle varHandle = lookupToUse.findVarHandle(type(), name, clazz);
-            return varHandle::set;
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
-    public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
-        try {
-            final Field field = type().getDeclaredField(name);
-            final int modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type(), lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final VarHandle varHandle = lookupToUse.findStaticVarHandle(type(), name, clazz);
-            return varHandle::set;
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
     public BeanMirror<T> set(String name, Object value) {
-        accessor.setField(object, name, value);
+        accessor.setField(object, name, value.getClass(), value);
         return this;
     }
 
-    public BeanMirror<Object> field(String name) {
-        return field(name, Object.class);
+    public <R> BeanMirror<R> field(String name, Class<R> clazz) {
+        final Object result = accessor.getField(object, name, clazz);
+        Objects.requireNonNull(result, "");
+        return new BeanMirror<>(clazz.cast(result), accessor);
     }
 
-    public <R> BeanMirror<R> field(String name, Class<R> clazz) {
-        final Object result = accessor.getField(object, name);
-        Objects.requireNonNull(result, "");
-        return new BeanMirror<>(clazz.cast(result), lookup);
+    public <R> Function<T, R> createGetter(Object target, String name, Class<R> clazz) {
+        try {
+            return accessor.createGetter(target, name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    public <R> Supplier<R> createStaticGetter(Class<T> target, String name, Class<R> clazz) {
+        try {
+            return accessor.createStaticGetter(target, name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    public <R> BiConsumer<T, R> createSetter(Object target, String name, Class<R> clazz) {
+        try {
+            return accessor.createSetter(target, name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    public <R> Consumer<R> createStaticSetter(Class<T> target, String name, Class<R> clazz) {
+        try {
+            return accessor.createStaticSetter(target, name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
     }
 
     // METHODS
@@ -227,14 +164,10 @@ public class BeanMirror<T> {
         return this;
     }
 
-    public BeanMirror<Object> call(String name, Object... args) {
-        return call(Object.class, name, args);
-    }
-
     public <R> BeanMirror<R> call(Class<R> clazz, String name, Object... args) {
         final Object result = accessor.callMethod(object, name, args);
         Objects.requireNonNull(result, "");
-        return new BeanMirror<>(clazz.cast(result), lookup);
+        return new BeanMirror<>(clazz.cast(result), accessor);
     }
 
     @Override

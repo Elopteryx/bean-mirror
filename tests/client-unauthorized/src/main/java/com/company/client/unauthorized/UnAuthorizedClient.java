@@ -17,6 +17,6 @@ public class UnAuthorizedClient {
         mirror.set("internalName", "Not so internal.");
         System.out.println(mirror.field("internalName", String.class).get());
 
-        System.out.println(mirror.call("internalMethod", "abc").get());
+        System.out.println(mirror.call(String.class, "internalMethod", "abc").get());
     }
 }
