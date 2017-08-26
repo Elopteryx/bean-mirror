@@ -1,6 +1,6 @@
 
-module com.company.client.legal {
+module com.company.client {
     requires com.company.server;
     requires com.github.elopteryx.reflect;
-    exports com.company.client.legal;
+    exports com.company.client;
 }

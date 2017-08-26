@@ -1,11 +1,11 @@
-package com.company.client.unauthorized;
+package com.company.client;
 
 import com.company.server.Server;
 import com.github.elopteryx.reflect.BeanMirror;
 
 import java.lang.invoke.MethodHandles;
 
-public class UnAuthorizedClient {
+public class Client {
 
     public static void main(String... args) throws Exception {
 

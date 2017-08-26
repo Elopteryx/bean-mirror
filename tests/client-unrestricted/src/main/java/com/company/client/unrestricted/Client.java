@@ -1,4 +1,4 @@
-package com.company.client.legal;
+package com.company.client.unrestricted;
 
 import com.company.server.Server;
 import com.github.elopteryx.reflect.BeanMirror;
@@ -8,7 +8,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 
-public class LegalClient {
+public class Client {
 
     public static void main(String... args) throws Throwable {
 

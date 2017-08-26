@@ -6,11 +6,11 @@ dependencies {
     /* Test module, service provider. */
     testCompile project(":tests:server")
 
-    /* Test module, client with legal access. */
-    testCompile project(":tests:client-legal")
-
     /* Test module, client with no authorized access. */
-    testCompile project(":tests:client-unauthorized")
+    testCompile project(":tests:client")
+
+    /* Test module, client with all access. */
+    testCompile project(":tests:client-unrestricted")
 
     /* Test runner. */
     testCompile "junit:junit:$junitVersion"

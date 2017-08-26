@@ -1,5 +1,5 @@
 
 module com.company.server {
-    exports com.company.server to com.company.client.legal, com.company.client.unauthorized;
-    opens com.company.server to com.company.client.legal;
+    exports com.company.server to com.company.client, com.company.client.unrestricted;
+    opens com.company.server to com.company.client.unrestricted;
 }
