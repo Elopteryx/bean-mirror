@@ -3,12 +3,6 @@ dependencies {
     /* Bean Mirror. */
     testCompile project(":bean-mirror")
 
-    /* Test runner. */
-    testCompile "junit:junit:$junitVersion"
-
-    /* Object mocking. */
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
-
 }
 
 tasks.withType(JavaCompile) {

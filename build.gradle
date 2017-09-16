@@ -34,8 +34,9 @@ subprojects {
 
     ext {
         jmhVersion = "1.19"
-        junitVersion = "4.12"
-        mockitoVersion = "2.8.47"
+        junitPlatformVersion = "1.0.0"
+        junitJupiterVersion = "5.0.0"
+        mockitoVersion = "2.10.0"
     }
 
     tasks.withType(JavaCompile) {
@@ -81,7 +82,7 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion = "8.1"
+        toolVersion = "8.2"
         configFile = new File("${projectDir}/../config/checkstyle/checkstyle.xml")
     }
 

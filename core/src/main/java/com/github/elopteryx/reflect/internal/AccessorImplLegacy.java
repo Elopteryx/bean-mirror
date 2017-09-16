@@ -15,10 +15,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class AccessorImpl implements Accessor {
+public class AccessorImplLegacy implements Accessor {
 
     @SuppressWarnings("unused")
-    AccessorImpl(Lookup lookup) {
+    AccessorImplLegacy(Lookup lookup) {
         // Unused, only for compatibility.
     }
 

@@ -125,33 +125,33 @@ public class BeanMirror<T> {
         return new BeanMirror<>(clazz.cast(result), accessor);
     }
 
-    public <R> Function<T, R> createGetter(Object target, String name, Class<R> clazz) {
+    public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
         try {
-            return accessor.createGetter(target, name, clazz);
+            return accessor.createGetter(object, name, clazz);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
 
-    public <R> Supplier<R> createStaticGetter(Class<T> target, String name, Class<R> clazz) {
+    public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
         try {
-            return accessor.createStaticGetter(target, name, clazz);
+            return accessor.createStaticGetter(type(), name, clazz);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
 
-    public <R> BiConsumer<T, R> createSetter(Object target, String name, Class<R> clazz) {
+    public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
         try {
-            return accessor.createSetter(target, name, clazz);
+            return accessor.createSetter(object, name, clazz);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
 
-    public <R> Consumer<R> createStaticSetter(Class<T> target, String name, Class<R> clazz) {
+    public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
         try {
-            return accessor.createStaticSetter(target, name, clazz);
+            return accessor.createStaticSetter(type(), name, clazz);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }

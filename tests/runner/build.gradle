@@ -13,10 +13,9 @@ dependencies {
     testCompile project(":tests:client-unrestricted")
 
     /* Test runner. */
-    testCompile "junit:junit:$junitVersion"
-
-    // https://mvnrepository.com/artifact/org.junit.platform/junit-platform-commons
-    testCompile group: 'org.junit.platform', name: 'junit-platform-commons', version: '1.0.0-RC3'
+    testCompile "org.junit.platform:junit-platform-commons:$junitPlatformVersion"
+    testCompile "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+    testCompile "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
 
 
     /* Object mocking. */
