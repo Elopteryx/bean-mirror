@@ -7,7 +7,7 @@ dist: trusty
 group: edge
 
 jdk:
-  - oraclejdk8
+  - oraclejdk9
 
 cache:
   directories:

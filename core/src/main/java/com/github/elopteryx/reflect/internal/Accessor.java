@@ -17,6 +17,8 @@ public interface Accessor {
     /**
      * Get a wrapper type for a primitive type, or the argument type itself, if
      * it is not a primitive type.
+     * @param type The class type to be wrapped
+     * @return The wrapped type, or null
      */
     static Class<?> wrapper(Class<?> type) {
         if (type == null) {

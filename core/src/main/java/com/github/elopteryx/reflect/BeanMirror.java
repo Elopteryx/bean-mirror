@@ -91,6 +91,7 @@ public class BeanMirror<T> {
 
     // VALUE
 
+    @SuppressWarnings("unchecked")
     public T get() {
         return (T)object;
     }

@@ -1,7 +1,5 @@
 package com.github.elopteryx.reflect;
 
-import com.hervian.lambda.Lambda;
-import com.hervian.lambda.LambdaFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -16,12 +14,9 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.ToIntFunction;
 
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
@@ -49,16 +44,6 @@ public class MHOpto {
 
     private static Map<String, Object> accessors = new HashMap<>();
 
-    private static Lambda cachedLambda;
-
-    private static ToIntFunction<Object> toIntFunction;
-
-    private static Function<Object, Integer> function;
-
-    private int getValue() {
-        return value;
-    }
-
     // We would normally use @Setup, but we need to initialize "static final" fields here...
     static {
         try {
@@ -79,14 +64,6 @@ public class MHOpto {
             static_unreflect = unreflect;
             static_mh = mh;
 
-            // Lambda
-            Method method = MHOpto.class.getDeclaredMethod("getValue");
-            cachedLambda = LambdaFactory.create(method);
-
-            final MethodHandle getterHandle = MethodHandles.lookup().unreflect(MHOpto.class.getDeclaredMethod("getValue"));
-            toIntFunction = PrivateTargetLambdaWorking.getterLambda(MethodHandles.lookup(), getterHandle);
-
-            function = PrivateTargetLambdaWorking.getterLambda2(MethodHandles.lookup(), getterHandle);
         } catch (IllegalAccessException | NoSuchFieldException e) {
             throw new IllegalStateException(e);
         } catch (Throwable e) {
@@ -187,37 +164,6 @@ public class MHOpto {
     @Benchmark
     public int static_mh_invokeExact() throws Throwable {
         return (int) static_mh.invokeExact(this);
-    }
-
-    // Lambda factory
-
-    @Benchmark
-    public int lambda() throws Throwable {
-        Method method = MHOpto.class.getDeclaredMethod("getValue");
-        Lambda lambda = LambdaFactory.create(method);
-        return lambda.invoke_for_int(this);
-    }
-
-    @Benchmark
-    public int lambda_cached() throws Throwable {
-        return cachedLambda.invoke_for_int(this);
-    }
-
-    @Benchmark
-    public int lambda_as_int_function() throws Throwable {
-        return toIntFunction.applyAsInt(this);
-    }
-
-    @Benchmark
-    public int lambda_as_function() throws Throwable {
-        return function.apply(this);
-    }
-
-    @Benchmark
-    public int lambda_as_function_without_caching() throws Throwable {
-        final MethodHandle getterHandle = MethodHandles.lookup().unreflect(MHOpto.class.getDeclaredMethod("getValue"));
-        Function<Object, Integer> function = PrivateTargetLambdaWorking.getterLambda2(MethodHandles.lookup(), getterHandle);
-        return function.apply(this);
     }
 
 }

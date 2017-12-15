@@ -33,10 +33,3 @@ publishing {
         }
     }
 }
-
-tasks.withType(JavaCompile) {
-    sourceCompatibility = 1.9
-    targetCompatibility = 1.9
-    options.fork = true
-    options.forkOptions.javaHome = new File("C:\\Program Files\\Java\\jdk-9")
-}
