@@ -1,18 +1,1 @@
-dependencies {
 
-    /* Bean Mirror. */
-    testCompile project(":bean-mirror")
-
-}
-
-ext.moduleName = 'com.company.server'
-
-compileJava {
-    inputs.property("moduleName", moduleName)
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
-    }
-}
