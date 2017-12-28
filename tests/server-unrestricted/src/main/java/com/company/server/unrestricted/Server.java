@@ -1,4 +1,4 @@
-package com.company.server;
+package com.company.server.unrestricted;
 
 public class Server {
 
@@ -8,7 +8,7 @@ public class Server {
 
     private long value = 4;
 
-    private Server(String name) {
+    public Server(String name) {
         this.name = name;
     }
 

@@ -1,11 +1,11 @@
 dependencies {
 
     /* Bean Mirror. */
-    testCompile project(":bean-mirror")
+    compile project(":bean-mirror")
 
 }
 
-ext.moduleName = 'com.company.server'
+ext.moduleName = 'com.company.client.unrestricted'
 
 compileJava {
     inputs.property("moduleName", moduleName)

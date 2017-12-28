@@ -37,7 +37,7 @@ public class AccessorImpl implements Accessor {
             final Lookup privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
 
             final MethodHandle constructorHandle = privateLookup.findConstructor(clazz, methodType(void.class, types));
-            return constructorHandle.invoke(args);
+            return constructorHandle.invokeWithArguments(args);
 
         } catch (Throwable e) {
             throw new RuntimeException(e);

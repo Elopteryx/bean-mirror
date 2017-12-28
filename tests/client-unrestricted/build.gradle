@@ -1,9 +1,0 @@
-dependencies {
-
-    /* Bean Mirror. */
-    compile project(":bean-mirror")
-
-    /* Test module, service provider. */
-    compile project(":tests:server")
-
-}

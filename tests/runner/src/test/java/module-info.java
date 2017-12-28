@@ -5,6 +5,8 @@ module com.github.elopteryx.reflect.tests {
 
     requires org.junit.jupiter.api;
 
+    requires com.company.server;
+    requires com.company.server.unrestricted;
     requires com.company.client;
-    requires com.company.client.unrestricted;
+    requires junit;
 }

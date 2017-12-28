@@ -5,15 +5,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class BeanMirrorTest {
+public class BeanMirrorTest {
 
+    @org.junit.Test
     @Test
-    void legalAccess() throws Throwable {
-        com.company.client.unrestricted.Client.main();
+    public void legalAccess() throws Throwable {
+        Client.legalAccess();
     }
 
+    @org.junit.Test
     @Test
-    void unauthorizedAccess() throws Exception {
-        final RuntimeException exception = assertThrows(RuntimeException.class, Client::main);
+    public void unauthorizedAccess() throws Exception {
+        final RuntimeException exception = assertThrows(RuntimeException.class, Client::unauthorizedAccess);
     }
 }

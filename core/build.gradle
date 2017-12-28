@@ -3,6 +3,18 @@ dependencies {
     testCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
 }
 
+ext.moduleName = 'com.github.elopteryx.reflect'
+
+compileJava {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
+}
+
 publishing {
     publications {
         maven(MavenPublication) {

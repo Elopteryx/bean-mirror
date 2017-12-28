@@ -44,29 +44,29 @@ subprojects {
         targetCompatibility = 9
     }
 
-    task javadocJar(type: Jar) {
-        classifier "javadoc"
-        from javadoc
-    }
+//    task javadocJar(type: Jar) {
+//        classifier "javadoc"
+//        from javadoc
+//    }
 
-    javadoc {
-        afterEvaluate {
-            configure(options) {
-                windowTitle "Bean Mirror API Documentation"
-                docTitle "Bean Mirror API Documentation"
-                bottom 'Copyright &#169; 2017 <a href="https://github.com/Elopteryx">Creative Elopteryx</a>'
-                breakIterator true
-                author false
-                source "9"
-                encoding "UTF-8"
-                docEncoding "UTF-8"
-                failOnError true
-                links = [
-                        "http://download.oracle.com/javase/9/docs/api/"
-                ]
-            }
-        }
-    }
+//    javadoc {
+//        afterEvaluate {
+//            configure(options) {
+//                windowTitle "Bean Mirror API Documentation"
+//                docTitle "Bean Mirror API Documentation"
+//                bottom 'Copyright &#169; 2017 <a href="https://github.com/Elopteryx">Creative Elopteryx</a>'
+//                breakIterator true
+//                author false
+//                source "9"
+//                encoding "UTF-8"
+//                docEncoding "UTF-8"
+//                failOnError true
+//                links = [
+//                        "http://download.oracle.com/javase/9/docs/api/"
+//                ]
+//            }
+//        }
+//    }
 
     task sourcesJar(type: Jar) {
         classifier "sources"
@@ -76,7 +76,7 @@ subprojects {
     artifacts {
         archives jar
         archives sourcesJar
-        archives javadocJar
+        //archives javadocJar
     }
 
     checkstyle {

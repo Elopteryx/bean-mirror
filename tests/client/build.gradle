@@ -6,4 +6,19 @@ dependencies {
     /* Test module, service provider. */
     compile project(":tests:server")
 
+    /* Test module, service provider. */
+    compile project(":tests:server-unrestricted")
+
+}
+
+ext.moduleName = 'com.company.server'
+
+compileJava {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
 }
