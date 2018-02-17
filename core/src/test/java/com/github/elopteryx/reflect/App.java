@@ -5,7 +5,7 @@ import java.lang.invoke.MethodHandles;
 public class App {
 
     public static class Base {
-        protected char a = 'a';
+        protected String a = "a";
     }
 
     public static class Target extends Base {
@@ -14,6 +14,7 @@ public class App {
     }
 
     public static class Child extends Target {
+        protected String a = "shadowed_a";
         protected char c = 'c';
     }
 
@@ -32,7 +33,8 @@ public class App {
         final var child = new Child();
 
         final var castedMirror = BeanMirror.of(child, lookup);
-        System.out.println(castedMirror.asType(Base.class).createGetter("a", char.class).apply(child));
+        System.out.println(castedMirror.createGetter("a", String.class).apply(child));
+        System.out.println(castedMirror.asType(Base.class).createGetter("a", String.class).apply(child));
         System.out.println(castedMirror.asType(Child.class).createGetter("c", char.class).apply(child));
 
         final var newChild = BeanMirror.of(Child.class, lookup).create().get();

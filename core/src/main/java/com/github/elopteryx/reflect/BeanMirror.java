@@ -55,33 +55,46 @@ public class BeanMirror<T> {
 
     public static <R> BeanMirror<R> of(R object, Lookup lookup) {
         Objects.requireNonNull(object);
-        return new BeanMirror<>(object, null, Accessor.of(lookup));
+        return new BeanMirror<>(object, null, Accessor.of(lookup, null));
     }
 
     public static <R> BeanMirror<R> of(Class<R> clazz, Lookup lookup) {
         Objects.requireNonNull(clazz);
-        return new BeanMirror<>(clazz, Accessor.of(lookup), null);
+        return new BeanMirror<>(clazz, Accessor.of(lookup, null), null);
     }
 
     // TYPE
 
+    /**
+     * Performs an up cast, allowing to treat the object as one of its
+     * ancestor types. This allows field and method lookup from the given
+     * super type. Useful if the child type has redefined ('shadowed') a
+     * property with the same name.
+     * @param clazz The type to be used
+     * @return A new mirror instance, using the given type
+     */
     @SuppressWarnings("unchecked")
     public <R> BeanMirror<R> asType(Class<R> clazz) {
         if (object instanceof Class) {
             if (clazz.isAssignableFrom((Class)object)) {
-                return new BeanMirror<>((Class<R>)object, accessor, clazz);
+                return new BeanMirror<>((Class<R>)object, Accessor.of(accessor.getLookup(), clazz), clazz);
             } else {
                 throw new IllegalArgumentException("Not a supertype!");
             }
         } else {
             if (clazz.isAssignableFrom(object.getClass())) {
-                return new BeanMirror<>((R)object, clazz, accessor);
+                return new BeanMirror<>((R)object, clazz, Accessor.of(accessor.getLookup(), clazz));
             } else {
                 throw new IllegalArgumentException("Not a supertype!");
             }
         }
     }
 
+    /**
+     * Returns the type of the current value or its super type
+     * if it was supplied.
+     * @return The type to be used
+     */
     private Class<?> type() {
         if (superType != null) {
             return superType;
@@ -91,6 +104,10 @@ public class BeanMirror<T> {
 
     // VALUE
 
+    /**
+     * Returns the current value.
+     * @return The current value
+     */
     @SuppressWarnings("unchecked")
     public T get() {
         return (T)object;
@@ -98,6 +115,12 @@ public class BeanMirror<T> {
 
     // CONSTRUCTORS
 
+    /**
+     * Creates a new instance from the current type. Returns it
+     * wrapped into the mirror.
+     * @param args The constructor arguments
+     * @return A new mirror instance, wrapping the created object
+     */
     @SuppressWarnings("unchecked")
     public BeanMirror<T> create(Object... args)  {
         final T result;
@@ -111,6 +134,13 @@ public class BeanMirror<T> {
 
     // FIELDS
 
+    /**
+     * Gets the value of the field, identified by its name.
+     * @param name
+     * @param clazz
+     * @param <R>
+     * @return
+     */
     public <R> R get(String name, Class<R> clazz) {
         return field(name, clazz).get();
     }

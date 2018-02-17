@@ -20,12 +20,15 @@ public class Accessor {
 
     private final Lookup lookup;
 
-    private Accessor(Lookup lookup) {
+    private final Class<?> superType;
+
+    public Accessor(Lookup lookup, Class<?> superType) {
         this.lookup = lookup;
+        this.superType = superType;
     }
 
-    public static Accessor of(Lookup lookup) {
-        return new Accessor(lookup);
+    public static Accessor of(Lookup lookup, Class<?> customType) {
+        return new Accessor(lookup, customType);
     }
 
     //CONSTRUCTORS
@@ -291,7 +294,15 @@ public class Accessor {
 
     // MISC
 
+
+    public Lookup getLookup() {
+        return lookup;
+    }
+
     private Class<?> type(Object object) {
+        if (superType != null) {
+            return superType;
+        }
         return object instanceof Class ? (Class<?>) object : object.getClass();
     }
 
