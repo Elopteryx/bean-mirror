@@ -121,8 +121,8 @@ public class BeanMirror<T> {
     }
 
     public <R> BeanMirror<R> field(String name, Class<R> clazz) {
-        final Object result = accessor.getField(object, name, clazz);
-        Objects.requireNonNull(result, "");
+        final var result = accessor.getField(object, name, clazz);
+        Objects.requireNonNull(result, "Field: " + name);
         return new BeanMirror<>(clazz.cast(result), accessor);
     }
 
@@ -166,7 +166,7 @@ public class BeanMirror<T> {
     }
 
     public <R> BeanMirror<R> call(Class<R> clazz, String name, Object... args) {
-        final Object result = accessor.callMethod(object, name, args);
+        final var result = accessor.callMethod(object, name, args);
         Objects.requireNonNull(result, "");
         return new BeanMirror<>(clazz.cast(result), accessor);
     }

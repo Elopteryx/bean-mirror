@@ -15,32 +15,32 @@ public class TestMethodPerf
     public static void main(String... args) throws Throwable
     {
         // hold result to prevent too much optimizations
-        final int[] dummy=new int[4];
+        final var dummy=new int[4];
 
-        Method reflected=TestMethodPerf.class
+        var reflected=TestMethodPerf.class
                 .getDeclaredMethod("myMethod", int.class, int.class);
-        final MethodHandles.Lookup lookup = MethodHandles.lookup();
-        MethodHandle mh=lookup.unreflect(reflected);
-        IntBinaryOperator lambda=(IntBinaryOperator)LambdaMetafactory.metafactory(
+        final var lookup = MethodHandles.lookup();
+        var mh=lookup.unreflect(reflected);
+        var lambda=(IntBinaryOperator)LambdaMetafactory.metafactory(
                 lookup, "applyAsInt", MethodType.methodType(IntBinaryOperator.class),
                 mh.type(), mh, mh.type()).getTarget().invokeExact();
 
-        for(int i=0; i<WARM_UP; i++)
+        for(var i = 0; i<WARM_UP; i++)
         {
             dummy[0]+=testDirect(dummy[0]);
             dummy[1]+=testLambda(dummy[1], lambda);
             dummy[2]+=testMH(dummy[1], mh);
             dummy[3]+=testReflection(dummy[2], reflected);
         }
-        long t0=System.nanoTime();
+        var t0=System.nanoTime();
         dummy[0]+=testDirect(dummy[0]);
-        long t1=System.nanoTime();
+        var t1=System.nanoTime();
         dummy[1]+=testLambda(dummy[1], lambda);
-        long t2=System.nanoTime();
+        var t2=System.nanoTime();
         dummy[2]+=testMH(dummy[1], mh);
-        long t3=System.nanoTime();
+        var t3=System.nanoTime();
         dummy[3]+=testReflection(dummy[2], reflected);
-        long t4=System.nanoTime();
+        var t4=System.nanoTime();
         System.out.printf("direct: %.2fs, lambda: %.2fs, mh: %.2fs, reflection: %.2fs%n",
                 (t1-t0)*1e-9, (t2-t1)*1e-9, (t3-t2)*1e-9, (t4-t3)*1e-9);
 
@@ -51,28 +51,28 @@ public class TestMethodPerf
 
     private static int testMH(int v, MethodHandle mh) throws Throwable
     {
-        for(int i=0; i<ITERATIONS; i++)
+        for(var i = 0; i<ITERATIONS; i++)
             v+=(int)mh.invokeExact(1000, v);
         return v;
     }
 
     private static int testReflection(int v, Method mh) throws Throwable
     {
-        for(int i=0; i<ITERATIONS; i++)
+        for(var i = 0; i<ITERATIONS; i++)
             v+=(int)mh.invoke(null, 1000, v);
         return v;
     }
 
     private static int testDirect(int v)
     {
-        for(int i=0; i<ITERATIONS; i++)
+        for(var i = 0; i<ITERATIONS; i++)
             v+=myMethod(1000, v);
         return v;
     }
 
     private static int testLambda(int v, IntBinaryOperator accessor)
     {
-        for(int i=0; i<ITERATIONS; i++)
+        for(var i = 0; i<ITERATIONS; i++)
             v+=accessor.applyAsInt(1000, v);
         return v;
     }

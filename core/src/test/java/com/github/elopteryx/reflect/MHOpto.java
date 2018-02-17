@@ -51,13 +51,13 @@ public class MHOpto {
             unreflect = MethodHandles.lookup().unreflectGetter(reflective);
             mh = MethodHandles.lookup().findGetter(MHOpto.class, "value", int.class);
 
-            Field reflective2 = MHOpto.class.getDeclaredField("value2");
+            var reflective2 = MHOpto.class.getDeclaredField("value2");
             accessors.put("value2", reflective2);
 
-            MethodHandle mh3 = MethodHandles.lookup().unreflectGetter(MHOpto.class.getDeclaredField("value3"));
+            var mh3 = MethodHandles.lookup().unreflectGetter(MHOpto.class.getDeclaredField("value3"));
             accessors.put("value3", mh3);
 
-            MethodHandle mh4 = MethodHandles.lookup().findGetter(MHOpto.class, "value4", int.class);
+            var mh4 = MethodHandles.lookup().findGetter(MHOpto.class, "value4", int.class);
             accessors.put("value4", mh4);
 
             static_reflective = reflective;
@@ -77,7 +77,7 @@ public class MHOpto {
     }
 
     @Benchmark
-    public int dynamic_reflect_without_caching() throws InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    public int dynamic_reflect_without_caching() throws IllegalAccessException, NoSuchFieldException {
         return (int) MHOpto.class.getDeclaredField("value2").get(this);
     }
 
@@ -89,7 +89,7 @@ public class MHOpto {
     // WITHOUT MAP
 
     @Benchmark
-    public int dynamic_reflect() throws InvocationTargetException, IllegalAccessException {
+    public int dynamic_reflect() throws IllegalAccessException {
         return (int) reflective.get(this);
     }
 
@@ -116,7 +116,7 @@ public class MHOpto {
     // WITH MAP
 
     @Benchmark
-    public int dynamic_reflect_with_map() throws InvocationTargetException, IllegalAccessException {
+    public int dynamic_reflect_with_map() throws IllegalAccessException {
         return (int) ((Field)accessors.get("value2")).get(this);
     }
 
@@ -142,7 +142,7 @@ public class MHOpto {
 
 
     @Benchmark
-    public int static_reflect() throws InvocationTargetException, IllegalAccessException {
+    public int static_reflect() throws IllegalAccessException {
         return (int) static_reflective.get(this);
     }
 

@@ -7,7 +7,7 @@ dist: trusty
 group: edge
 
 jdk:
-  - oraclejdk9
+  - oraclejdk10
 
 cache:
   directories:
@@ -21,6 +21,3 @@ env:
 
 script:
   - ./gradlew build
-
-after_success:
-  - ./gradlew coveralls

@@ -8,9 +8,9 @@ public class Client {
 
     public static void unauthorizedAccess() throws Exception {
 
-        final MethodHandles.Lookup lookup = MethodHandles.lookup();
+        final var lookup = MethodHandles.lookup();
 
-        BeanMirror<?> mirror = BeanMirror.of(Class.forName("com.company.server.Server"), lookup).create("server");
+        var mirror = BeanMirror.of(Class.forName("com.company.server.Server"), lookup).create("server");
 
         System.out.println(mirror.field("internalName", String.class).get());
         mirror.set("internalName", "Not so internal.");
@@ -21,9 +21,9 @@ public class Client {
 
     public static void legalAccess() throws Exception {
 
-        final MethodHandles.Lookup lookup = MethodHandles.lookup();
+        final var lookup = MethodHandles.lookup();
 
-        BeanMirror<?> mirror = BeanMirror.of(Class.forName("com.company.server.unrestricted.Server"), lookup).create("server");
+        var mirror = BeanMirror.of(Class.forName("com.company.server.unrestricted.Server"), lookup).create("server");
 
         System.out.println(mirror.field("internalName", String.class).get());
         mirror.set("internalName", "Not so internal.");
