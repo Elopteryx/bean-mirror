@@ -1,4 +1,4 @@
-package com.github.elopteryx.reflect;
+package com.github.elopteryx.reflect.tests;
 
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;

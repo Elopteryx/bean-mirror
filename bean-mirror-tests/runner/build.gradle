@@ -1,3 +1,5 @@
+apply plugin: 'org.junit.platform.gradle.plugin'
+
 dependencies {
 
     /* Bean Mirror. */
@@ -6,23 +8,22 @@ dependencies {
     /* Test module, service provider. */
     testCompile project(":bean-mirror-tests:server")
 
-    /* Test module, client with all access. */
+    /* Test module, open service provider. */
     testCompile project(":bean-mirror-tests:server-unrestricted")
 
-    /* Test module, client with no authorized access. */
+    /* Test module, client for the servers. */
     testCompile project(":bean-mirror-tests:client")
 
+    /* Performance benchmark tool. */
+    testCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
+    testCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+
     /* Test runner. */
-    testCompile "org.junit.platform:junit-platform-commons:$junitPlatformVersion"
     testCompile "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-    testCompile "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
 
-    // https://mvnrepository.com/artifact/junit/junit
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-
-
-    /* Object mocking. */
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
+    testRuntime "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
+    testRuntime "org.junit.platform:junit-platform-runner:$junitPlatformVersion"
 
 }
 
@@ -33,8 +34,8 @@ compileTestJava {
     doFirst {
         options.compilerArgs = [
                 '--module-path', classpath.asPath,
-                '--add-modules', 'junit',
-                '--add-reads', "$moduleName=junit",
+                // '--add-modules', 'junit',
+                // '--add-reads', "$moduleName=junit",
                 '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
         ]
         classpath = files()

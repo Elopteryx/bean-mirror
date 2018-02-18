@@ -6,7 +6,7 @@ dependencies {
     /* Test module, service provider. */
     compile project(":bean-mirror-tests:server")
 
-    /* Test module, service provider. */
+    /* Test module, open service provider. */
     compile project(":bean-mirror-tests:server-unrestricted")
 
 }

@@ -168,7 +168,7 @@ public class BeanMirror<T> {
             throw new BeanMirrorException(throwable);
         }
     }
-
+    @SuppressWarnings("unchecked")
     public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
         try {
             return createStaticGetter((Class<T>) type(), name, clazz);
@@ -185,6 +185,7 @@ public class BeanMirror<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
         try {
             return createStaticSetter((Class<T>) type(), name, clazz);

@@ -1,4 +1,4 @@
-package com.github.elopteryx.reflect;
+package com.github.elopteryx.reflect.tests;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -13,7 +13,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
