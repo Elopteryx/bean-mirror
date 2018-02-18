@@ -171,7 +171,7 @@ public class BeanMirror<T> {
 
     public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
         try {
-            return createStaticGetter(type(), name, clazz);
+            return createStaticGetter((Class<T>) type(), name, clazz);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -187,7 +187,7 @@ public class BeanMirror<T> {
 
     public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
         try {
-            return createStaticSetter(type(), name, clazz);
+            return createStaticSetter((Class<T>) type(), name, clazz);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -196,7 +196,7 @@ public class BeanMirror<T> {
     // METHODS
 
     public BeanMirror<T> run(String name, Object... args) {
-        callMethod(object, name, args);
+        runMethod(object, name, args);
         return this;
     }
 
@@ -223,7 +223,7 @@ public class BeanMirror<T> {
 
     //CONSTRUCTORS
 
-    public Object useConstructor(Class<?> clazz, Object... args) {
+    private Object useConstructor(Class<?> clazz, Object... args) {
         try {
             final var types = types(args);
 
@@ -239,7 +239,7 @@ public class BeanMirror<T> {
 
     // FIELDS
 
-    public Object getField(Object object, String fieldName, Class<?> fieldType) {
+    private Object getField(Object object, String fieldName, Class<?> fieldType) {
         try {
             final var clazz = object.getClass();
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
@@ -250,7 +250,7 @@ public class BeanMirror<T> {
         }
     }
 
-    public void setField(Object object, String fieldName, Class<?> fieldType, Object value) {
+    private void setField(Object object, String fieldName, Class<?> fieldType, Object value) {
         try {
             final var clazz = object.getClass();
             final var field = clazz.getDeclaredField(fieldName);
@@ -265,7 +265,7 @@ public class BeanMirror<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public <T, R> Function<T, R> createGetter(Object target, String name, Class<R> clazz) {
+    private <R> Function<T, R> createGetter(Object target, String name, Class<R> clazz) {
         try {
             final var type = type(target);
             final var field = type.getDeclaredField(name);
@@ -285,7 +285,7 @@ public class BeanMirror<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public <T, R> Supplier<R> createStaticGetter(Class<T> target, String name, Class<R> clazz) {
+    private <R> Supplier<R> createStaticGetter(Class<T> target, String name, Class<R> clazz) {
         try {
             final var type = type(target);
             final var field = type.getDeclaredField(name);
@@ -304,7 +304,7 @@ public class BeanMirror<T> {
         }
     }
 
-    public <T, R> BiConsumer<T, R> createSetter(Object target, String name, Class<R> clazz) {
+    private <R> BiConsumer<T, R> createSetter(Object target, String name, Class<R> clazz) {
         try {
             final var type = type(target);
             final var field = type.getDeclaredField(name);
@@ -322,7 +322,7 @@ public class BeanMirror<T> {
         }
     }
 
-    public <T, R> Consumer<R> createStaticSetter(Class<T> target, String name, Class<R> clazz) {
+    private <R> Consumer<R> createStaticSetter(Class<T> target, String name, Class<R> clazz) {
         try {
             final var type = type(target);
             final var field = type.getDeclaredField(name);
@@ -342,7 +342,7 @@ public class BeanMirror<T> {
 
     // METHODS
 
-    public void runMethod(Object object, String name, Object... args) throws BeanMirrorException {
+    private void runMethod(Object object, String name, Object... args) throws BeanMirrorException {
         try {
             runOrCallMethod(false, object, name, args);
         } catch (Throwable e) {
@@ -350,7 +350,7 @@ public class BeanMirror<T> {
         }
     }
 
-    public Object callMethod(Object object, String name, Object... args) {
+    private Object callMethod(Object object, String name, Object... args) {
         try {
             return runOrCallMethod(true, object, name, args);
         } catch (Throwable e) {

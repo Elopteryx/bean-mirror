@@ -16,7 +16,8 @@ public class Client {
         mirror.set("internalName", "Not so internal.");
         System.out.println(mirror.field("internalName", String.class).get());
 
-        System.out.println(mirror.call(String.class, "internalMethod", "abc").get());
+        mirror.run("internalRunnable", "abc");
+        System.out.println(mirror.call(String.class, "internalCallable", "abc").get());
     }
 
     public static void legalAccess() throws Exception {
@@ -29,6 +30,7 @@ public class Client {
         mirror.set("internalName", "Not so internal.");
         System.out.println(mirror.field("internalName", String.class).get());
 
-        System.out.println(mirror.call(String.class, "internalMethod", "abc").get());
+        mirror.run("internalRunnable", "abc");
+        System.out.println(mirror.call(String.class, "internalCallable", "abc").get());
     }
 }

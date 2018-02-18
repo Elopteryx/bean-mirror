@@ -16,7 +16,11 @@ public class Server {
         return name;
     }
 
-    private String internalMethod(String str) {
+    private void internalRunnable(String str) {
+        System.out.println(str + " " + str);
+    }
+
+    private String internalCallable(String str) {
         return str + " " + str;
     }
 }
