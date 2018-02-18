@@ -1,11 +1,9 @@
-rootProject.name = "bean-mirror-parent"
+rootProject.name = 'bean-mirror-parent'
 
-include "core"
-include "tests"
-include "tests:server"
-include "tests:server-unrestricted"
-include "tests:client"
-include "tests:runner"
-
-findProject(":core")?.name = "bean-mirror"
+include 'bean-mirror-core'
+include 'bean-mirror-tests'
+include 'bean-mirror-tests:server'
+include 'bean-mirror-tests:server-unrestricted'
+include 'bean-mirror-tests:client'
+include 'bean-mirror-tests:runner'
 

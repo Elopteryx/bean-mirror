@@ -1,6 +1,4 @@
-package com.github.elopteryx.reflect.internal;
-
-import com.github.elopteryx.reflect.BeanMirrorException;
+package com.github.elopteryx.reflect;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -9,6 +7,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -16,19 +15,210 @@ import java.util.function.Supplier;
 
 import static java.lang.invoke.MethodType.methodType;
 
-public class Accessor {
+/**
+ * A generic wrapper class for accessing the given instance.
+ * @param <T> The generic type for the current value.
+ */
+public class BeanMirror<T> {
 
+    /**
+     * The wrapped value. Cannot be null.
+     */
+    private final Object object;
+
+    /**
+     * The super type. If defined then it is used
+     * instead of the actual wrapped value
+     * for accessing fields and methods.
+     */
+    private final Class<? super T> superType;
+
+    /**
+     * The lookup used to hack into the
+     * properties of the value. It must be
+     * supplied from the client code.
+     */
     private final Lookup lookup;
 
-    private final Class<?> superType;
-
-    public Accessor(Lookup lookup, Class<?> superType) {
+    private BeanMirror(T object, Lookup lookup) {
+        this.object = object;
         this.lookup = lookup;
-        this.superType = superType;
+        this.superType = null;
     }
 
-    public static Accessor of(Lookup lookup, Class<?> customType) {
-        return new Accessor(lookup, customType);
+    private BeanMirror(T object, Class<? super T> superType, Lookup lookup) {
+        this.object = object;
+        this.superType = superType;
+        this.lookup = lookup;
+    }
+
+    private BeanMirror(Class<T> object, Lookup lookup, Class<? super T> superType) {
+        this.object = object;
+        this.superType = superType;
+        this.lookup = lookup;
+    }
+
+    public static <R> BeanMirror<R> of(R object, Lookup lookup) {
+        Objects.requireNonNull(object);
+        return new BeanMirror<>(object, null, lookup);
+    }
+
+    public static <R> BeanMirror<R> of(Class<R> clazz, Lookup lookup) {
+        Objects.requireNonNull(clazz);
+        return new BeanMirror<>(clazz, lookup, null);
+    }
+
+    // TYPE
+
+    /**
+     * Performs an up cast, allowing to treat the object as one of its
+     * ancestor types. This allows field and method lookup from the given
+     * super type. Useful if the child type has redefined ('shadowed') a
+     * property with the same name.
+     * @param clazz The type to be used
+     * @return A new mirror instance, using the given type
+     */
+    @SuppressWarnings("unchecked")
+    public <R> BeanMirror<R> asType(Class<R> clazz) {
+        if (object instanceof Class) {
+            if (clazz.isAssignableFrom((Class)object)) {
+                return new BeanMirror<>((Class<R>)object, lookup, clazz);
+            } else {
+                throw new IllegalArgumentException("Not a supertype!");
+            }
+        } else {
+            if (clazz.isAssignableFrom(object.getClass())) {
+                return new BeanMirror<>((R)object, clazz, lookup);
+            } else {
+                throw new IllegalArgumentException("Not a supertype!");
+            }
+        }
+    }
+
+    /**
+     * Returns the type of the current value or its super type
+     * if it was supplied.
+     * @return The type to be used
+     */
+    private Class<?> type() {
+        if (superType != null) {
+            return superType;
+        }
+        return object instanceof Class ? (Class<?>)object : object.getClass();
+    }
+
+    // VALUE
+
+    /**
+     * Returns the current value.
+     * @return The current value
+     */
+    @SuppressWarnings("unchecked")
+    public T get() {
+        return (T)object;
+    }
+
+    // CONSTRUCTORS
+
+    /**
+     * Creates a new instance from the current type. Returns it
+     * wrapped into the mirror.
+     * @param args The constructor arguments
+     * @return A new mirror instance, wrapping the created object
+     */
+    @SuppressWarnings("unchecked")
+    public BeanMirror<T> create(Object... args)  {
+        final T result;
+        try {
+            result = (T)useConstructor(type(), args);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+        return new BeanMirror<>(result, lookup);
+    }
+
+    // FIELDS
+
+    /**
+     * Gets the value of the field, identified by its name.
+     * @param name
+     * @param clazz
+     * @param <R>
+     * @return
+     */
+    public <R> R get(String name, Class<R> clazz) {
+        return field(name, clazz).get();
+    }
+
+    public BeanMirror<T> set(String name, Object value) {
+        setField(object, name, value.getClass(), value);
+        return this;
+    }
+
+    public <R> BeanMirror<R> field(String name, Class<R> clazz) {
+        final var result = getField(object, name, clazz);
+        Objects.requireNonNull(result, "Field: " + name);
+        return new BeanMirror<>(clazz.cast(result), lookup);
+    }
+
+    public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
+        try {
+            return createGetter(object, name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
+        try {
+            return createStaticGetter(type(), name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
+        try {
+            return createSetter(object, name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
+        try {
+            return createStaticSetter(type(), name, clazz);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    // METHODS
+
+    public BeanMirror<T> run(String name, Object... args) {
+        callMethod(object, name, args);
+        return this;
+    }
+
+    public <R> BeanMirror<R> call(Class<R> clazz, String name, Object... args) {
+        final var result = callMethod(object, name, args);
+        Objects.requireNonNull(result, "");
+        return new BeanMirror<>(clazz.cast(result), lookup);
+    }
+
+    @Override
+    public int hashCode() {
+        return object.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BeanMirror && object.equals(((BeanMirror) obj).get());
+    }
+
+    @Override
+    public String toString() {
+        return object.toString();
     }
 
     //CONSTRUCTORS
@@ -87,7 +277,7 @@ public class Accessor {
                 lookupToUse = lookup;
             }
             final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
-            final var classToUse = (Class<R>) Accessor.wrapper(clazz);
+            final var classToUse = (Class<R>) wrapper(clazz);
             return obj -> classToUse.cast(varHandle.get(obj));
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
@@ -107,7 +297,7 @@ public class Accessor {
                 lookupToUse = lookup;
             }
             final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
-            final var classToUse = (Class<R>) Accessor.wrapper(clazz);
+            final var classToUse = (Class<R>) wrapper(clazz);
             return () -> classToUse.cast(varHandle.get());
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
@@ -279,7 +469,7 @@ public class Accessor {
                 if (actualTypes[i] == NULL.class)
                     continue;
 
-                if (Accessor.wrapper(declaredTypes[i]).isAssignableFrom(Accessor.wrapper(actualTypes[i])))
+                if (wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i])))
                     continue;
 
                 return false;
@@ -293,11 +483,6 @@ public class Accessor {
     }
 
     // MISC
-
-
-    public Lookup getLookup() {
-        return lookup;
-    }
 
     private Class<?> type(Object object) {
         if (superType != null) {

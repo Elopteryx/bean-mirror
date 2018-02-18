@@ -1,25 +1,25 @@
 plugins {
-    id "com.github.ben-manes.versions" version "0.15.0"
+    id 'com.github.ben-manes.versions' version '0.15.0'
 }
 
-task testReport(type: TestReport, group: "Build") {
-    description "Generates an aggregate test report."
+task testReport(type: TestReport, group: 'Build') {
+    description 'Generates an aggregate test report.'
     destinationDir file("${buildDir}/reports/allTests")
 }
 
 subprojects {
 
-    apply plugin: "java"
-    apply plugin: "idea"
-    apply plugin: "eclipse"
-    apply plugin: "maven-publish"
-    apply plugin: "maven"
-    apply plugin: "signing"
-    apply plugin: "com.github.ben-manes.versions"
-    apply plugin: "checkstyle"
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+    apply plugin: 'maven-publish'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+    apply plugin: 'com.github.ben-manes.versions'
+    apply plugin: 'checkstyle'
 
-    group = "com.github.elopteryx"
-    version = "1.0.0-SNAPSHOT"
+    group = 'com.github.elopteryx'
+    version = '1.0.0-SNAPSHOT'
 
     repositories {
         mavenCentral()
@@ -27,10 +27,10 @@ subprojects {
     }
 
     ext {
-        jmhVersion = "1.19"
-        junitPlatformVersion = "1.0.3"
-        junitJupiterVersion = "5.0.3"
-        mockitoVersion = "2.15.0"
+        jmhVersion = '1.19'
+        junitPlatformVersion = '1.0.3'
+        junitJupiterVersion = '5.0.3'
+        mockitoVersion = '2.15.0'
     }
 
     tasks.withType(JavaCompile) {
@@ -39,31 +39,31 @@ subprojects {
     }
 
     task javadocJar(type: Jar) {
-        classifier "javadoc"
+        classifier 'javadoc'
         from javadoc
     }
 
     javadoc {
         afterEvaluate {
             configure(options) {
-                windowTitle "Bean Mirror API Documentation"
-                docTitle "Bean Mirror API Documentation"
+                windowTitle 'Bean Mirror API Documentation'
+                docTitle 'Bean Mirror API Documentation'
                 bottom 'Copyright &#169; 2018 <a href="https://github.com/Elopteryx">Creative Elopteryx</a>'
                 breakIterator true
                 author false
-                source "10"
-                encoding "UTF-8"
-                docEncoding "UTF-8"
+                source '10'
+                encoding 'UTF-8'
+                docEncoding 'UTF-8'
                 failOnError true
                 links = [
-                        "http://download.oracle.com/javase/9/docs/api/"
+                        'http://download.oracle.com/javase/9/docs/api/'
                 ]
             }
         }
     }
 
     task sourcesJar(type: Jar) {
-        classifier "sources"
+        classifier 'sources'
         from sourceSets.main.allSource
     }
 
@@ -74,12 +74,12 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion "8.8"
-        configFile = new File("${projectDir}/../config/checkstyle/checkstyle.xml")
+        toolVersion '8.8'
+        configFile = new File("${project.rootDir}/config/checkstyle/checkstyle.xml")
     }
 
     signing {
-        required { !version.endsWith("SNAPSHOT") && gradle.taskGraph.hasTask("uploadArchives") }
+        required { !version.endsWith('SNAPSHOT') && gradle.taskGraph.hasTask('uploadArchives') }
         sign configurations.archives
     }
 

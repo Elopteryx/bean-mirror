@@ -1,16 +1,16 @@
 dependencies {
 
     /* Bean Mirror. */
-    testCompile project(":bean-mirror")
+    testCompile project(":bean-mirror-core")
 
     /* Test module, service provider. */
-    testCompile project(":tests:server")
+    testCompile project(":bean-mirror-tests:server")
 
     /* Test module, client with all access. */
-    testCompile project(":tests:server-unrestricted")
+    testCompile project(":bean-mirror-tests:server-unrestricted")
 
     /* Test module, client with no authorized access. */
-    testCompile project(":tests:client")
+    testCompile project(":bean-mirror-tests:client")
 
     /* Test runner. */
     testCompile "org.junit.platform:junit-platform-commons:$junitPlatformVersion"

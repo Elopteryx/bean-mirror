@@ -1,13 +1,13 @@
 dependencies {
 
     /* Bean Mirror. */
-    compile project(":bean-mirror")
+    compile project(":bean-mirror-core")
 
     /* Test module, service provider. */
-    compile project(":tests:server")
+    compile project(":bean-mirror-tests:server")
 
     /* Test module, service provider. */
-    compile project(":tests:server-unrestricted")
+    compile project(":bean-mirror-tests:server-unrestricted")
 
 }
 
