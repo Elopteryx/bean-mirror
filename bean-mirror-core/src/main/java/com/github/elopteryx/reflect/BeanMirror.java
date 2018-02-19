@@ -17,9 +17,11 @@ import static java.lang.invoke.MethodType.methodType;
 
 /**
  * A generic wrapper class for accessing the given instance.
+ * It can be created from a plain object or from a class type.
+ * The class instances are immutable.
  * @param <T> The generic type for the current value.
  */
-public class BeanMirror<T> {
+public final class BeanMirror<T> {
 
     /**
      * The wrapped value. Cannot be null.
@@ -41,9 +43,7 @@ public class BeanMirror<T> {
     private final Lookup lookup;
 
     private BeanMirror(T object, Lookup lookup) {
-        this.object = object;
-        this.lookup = lookup;
-        this.superType = null;
+        this(object, null, lookup);
     }
 
     private BeanMirror(T object, Class<? super T> superType, Lookup lookup) {
@@ -58,11 +58,23 @@ public class BeanMirror<T> {
         this.lookup = lookup;
     }
 
+    /**
+     * Creates a new mirror instance, wrapping the given object.
+     * @param object The object to be wrapped
+     * @param lookup User-supplied lookup for access check
+     * @return A new mirror instance
+     */
     public static <R> BeanMirror<R> of(R object, Lookup lookup) {
         Objects.requireNonNull(object);
         return new BeanMirror<>(object, null, lookup);
     }
 
+    /**
+     * Creates a new mirror instance, wrapping the given class object.
+     * @param clazz The object to be wrapped
+     * @param lookup User-supplied lookup for access check
+     * @return A new mirror instance
+     */
     public static <R> BeanMirror<R> of(Class<R> clazz, Lookup lookup) {
         Objects.requireNonNull(clazz);
         return new BeanMirror<>(clazz, lookup, null);
@@ -141,26 +153,46 @@ public class BeanMirror<T> {
 
     /**
      * Gets the value of the field, identified by its name.
-     * @param name
-     * @param clazz
-     * @param <R>
-     * @return
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @return The value of the field
      */
     public <R> R get(String name, Class<R> clazz) {
         return field(name, clazz).get();
     }
 
+    /**
+     * Sets the value of the field, identified by its name.
+     * @param name The name of the field
+     * @param value The new value
+     * @return The same mirror instance
+     */
     public BeanMirror<T> set(String name, Object value) {
         setField(object, name, value.getClass(), value);
         return this;
     }
 
+    /**
+     * Switches over to the field, identified by its name.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @return A new mirror instance, wrapping the field
+     */
     public <R> BeanMirror<R> field(String name, Class<R> clazz) {
         final var result = getField(object, name, clazz);
         Objects.requireNonNull(result, "Field: " + name);
         return new BeanMirror<>(clazz.cast(result), lookup);
     }
 
+    /**
+     * Creates a new function which can be used to get the value of
+     * field for the object given to the function. The first generic
+     * type will be the same as the current type, the second type will
+     * be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @return A new Function
+     */
     public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
         try {
             return createGetter(object, name, clazz);
@@ -168,6 +200,15 @@ public class BeanMirror<T> {
             throw new BeanMirrorException(throwable);
         }
     }
+
+    /**
+     * Creates a new supplier which can be used to get the value of
+     * the static field for the current type. The return
+     * type will be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @return A new Supplier
+     */
     @SuppressWarnings("unchecked")
     public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
         try {
@@ -177,6 +218,15 @@ public class BeanMirror<T> {
         }
     }
 
+    /**
+     * Creates a new bi-consumer which can be used to set the value of
+     * field for the object given to the function. The first generic
+     * type will be the same as the current type, the second type will
+     * be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @return A new BiConsumer
+     */
     public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
         try {
             return createSetter(object, name, clazz);
@@ -185,6 +235,14 @@ public class BeanMirror<T> {
         }
     }
 
+    /**
+     * Creates a new consumer which can be used to set the value of
+     * the static field for the current type. The generic
+     * type will be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @return A new Consumer
+     */
     @SuppressWarnings("unchecked")
     public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
         try {
@@ -196,11 +254,28 @@ public class BeanMirror<T> {
 
     // METHODS
 
+    /**
+     * Runs the method of the current object, which is identified
+     * by its name and the given arguments. If the method has a return type,
+     * then it will be ignored.
+     * @param name The name of the method
+     * @param args The arguments which will be used for the invocation
+     * @return The same mirror instance
+     */
     public BeanMirror<T> run(String name, Object... args) {
         runMethod(object, name, args);
         return this;
     }
 
+    /**
+     * Calls the method of the current object, which is identified
+     * by its name and the given arguments. The returned value will
+     * be wrapped into a new mirror instance, using its type.
+     * @param clazz The type of the return value
+     * @param name The name of the method
+     * @param args The arguments which will be used for the invocation
+     * @return A new mirror instance, wrapping the returned value
+     */
     public <R> BeanMirror<R> call(Class<R> clazz, String name, Object... args) {
         final var result = callMethod(object, name, args);
         Objects.requireNonNull(result, "");
