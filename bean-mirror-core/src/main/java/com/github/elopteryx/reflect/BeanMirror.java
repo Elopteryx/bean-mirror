@@ -168,7 +168,7 @@ public final class BeanMirror<T> {
      * @return The same mirror instance
      */
     public BeanMirror<T> set(String name, Object value) {
-        setField(object, name, value.getClass(), value);
+        setField(name, value);
         return this;
     }
 
@@ -179,7 +179,7 @@ public final class BeanMirror<T> {
      * @return A new mirror instance, wrapping the field
      */
     public <R> BeanMirror<R> field(String name, Class<R> clazz) {
-        final var result = getField(object, name, clazz);
+        final var result = getField(name, clazz);
         Objects.requireNonNull(result, "Field: " + name);
         return new BeanMirror<>(clazz.cast(result), lookup);
     }
@@ -315,9 +315,9 @@ public final class BeanMirror<T> {
 
     // FIELDS
 
-    private Object getField(Object object, String fieldName, Class<?> fieldType) {
+    private Object getField(String fieldName, Class<?> fieldType) {
         try {
-            final var clazz = object.getClass();
+            final var clazz = type();
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
             final var varHandle = privateLookup.findVarHandle(clazz, fieldName, fieldType);
             return varHandle.get(object);
@@ -326,14 +326,11 @@ public final class BeanMirror<T> {
         }
     }
 
-    private void setField(Object object, String fieldName, Class<?> fieldType, Object value) {
+    private void setField(String fieldName, Object value) {
         try {
-            final var clazz = object.getClass();
-            final var field = clazz.getDeclaredField(fieldName);
-
+            final var clazz = type();
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
-            final var handle = privateLookup.unreflectVarHandle(field);
-
+            final var handle = privateLookup.findVarHandle(clazz, fieldName, value.getClass());
             handle.set(object, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
