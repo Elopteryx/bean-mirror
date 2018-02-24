@@ -2,8 +2,6 @@ package com.github.elopteryx.reflect;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -577,25 +575,6 @@ public final class BeanMirror<T> {
         }
 
         return result;
-    }
-
-    private static <T extends AccessibleObject> T accessible(T accessible, Object object) {
-        if (accessible == null) {
-            return null;
-        }
-
-        if (accessible instanceof Member) {
-            var member = (Member) accessible;
-
-            if (Modifier.isPublic(member.getModifiers()) && Modifier.isPublic(member.getDeclaringClass().getModifiers())) {
-                return accessible;
-            }
-        }
-        if (!accessible.canAccess(object)) {
-            accessible.setAccessible(true);
-        }
-
-        return accessible;
     }
 
     /**

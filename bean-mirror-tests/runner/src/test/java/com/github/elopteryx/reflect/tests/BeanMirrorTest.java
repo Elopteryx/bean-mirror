@@ -5,8 +5,10 @@ import com.github.elopteryx.reflect.BeanMirror;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BeanMirrorTest {
 
@@ -34,6 +36,14 @@ class BeanMirrorTest {
     public static class Child extends Target {
         protected String a = "shadowed_a";
         protected char c = 'c';
+
+        public void run(Object param) {
+            Objects.requireNonNull(param);
+        }
+
+        public String call() {
+            return "callable";
+        }
     }
 
     @Test
@@ -68,8 +78,15 @@ class BeanMirrorTest {
         assertEquals(castedMirror.asType(Base.class).createGetter("a", String.class).apply(child), "a");
         assertEquals((char)castedMirror.asType(Child.class).createGetter("c", char.class).apply(child), 'c');
 
-        final var newChild = BeanMirror.of(Child.class, lookup).create().get();
+        final var childMirror = BeanMirror.of(Child.class, lookup).create();
+        final var newChild = childMirror.get();
         assertEquals(newChild.getClass(), Child.class);
+
+        childMirror.run("run", "arg");
+        final var exception = assertThrows(RuntimeException.class, () -> childMirror.run("run", (Object) null));
+        assertEquals(exception.getCause().getClass(), NullPointerException.class);
+
+        assertEquals(childMirror.call(String.class, "call").get(), "callable");
 
     }
 }
