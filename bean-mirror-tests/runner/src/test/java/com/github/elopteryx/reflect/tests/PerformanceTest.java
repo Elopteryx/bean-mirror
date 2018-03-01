@@ -17,13 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1)
+@Measurement(iterations = 5, time = 1)
 @Fork(3)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
-public class MHOpto {
+public class PerformanceTest {
 
     private int value = 42;
 
@@ -46,17 +46,17 @@ public class MHOpto {
     // We would normally use @Setup, but we need to initialize "static final" fields here...
     static {
         try {
-            reflective = MHOpto.class.getDeclaredField("value");
+            reflective = PerformanceTest.class.getDeclaredField("value");
             unreflect = MethodHandles.lookup().unreflectGetter(reflective);
-            mh = MethodHandles.lookup().findGetter(MHOpto.class, "value", int.class);
+            mh = MethodHandles.lookup().findGetter(PerformanceTest.class, "value", int.class);
 
-            var reflective2 = MHOpto.class.getDeclaredField("value2");
+            var reflective2 = PerformanceTest.class.getDeclaredField("value2");
             accessors.put("value2", reflective2);
 
-            var mh3 = MethodHandles.lookup().unreflectGetter(MHOpto.class.getDeclaredField("value3"));
+            var mh3 = MethodHandles.lookup().unreflectGetter(PerformanceTest.class.getDeclaredField("value3"));
             accessors.put("value3", mh3);
 
-            var mh4 = MethodHandles.lookup().findGetter(MHOpto.class, "value4", int.class);
+            var mh4 = MethodHandles.lookup().findGetter(PerformanceTest.class, "value4", int.class);
             accessors.put("value4", mh4);
 
             static_reflective = reflective;
@@ -77,12 +77,12 @@ public class MHOpto {
 
     @Benchmark
     public int dynamic_reflect_without_caching() throws IllegalAccessException, NoSuchFieldException {
-        return (int) MHOpto.class.getDeclaredField("value2").get(this);
+        return (int) PerformanceTest.class.getDeclaredField("value2").get(this);
     }
 
     @Benchmark
     public int dynamic_mh_without_caching() throws Throwable {
-        return (int) MethodHandles.lookup().findGetter(MHOpto.class, "value2", int.class).invokeExact(this);
+        return (int) MethodHandles.lookup().findGetter(PerformanceTest.class, "value2", int.class).invokeExact(this);
     }
 
     // WITHOUT MAP

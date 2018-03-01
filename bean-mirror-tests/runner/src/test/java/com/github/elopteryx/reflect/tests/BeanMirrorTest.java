@@ -37,7 +37,7 @@ class BeanMirrorTest {
         protected String a = "shadowed_a";
         protected char c = 'c';
 
-        public void run(Object param) {
+        public void run(String param) {
             Objects.requireNonNull(param);
         }
 
@@ -83,7 +83,7 @@ class BeanMirrorTest {
         assertEquals(newChild.getClass(), Child.class);
 
         childMirror.run("run", "arg");
-        final var exception = assertThrows(RuntimeException.class, () -> childMirror.run("run", (Object) null));
+        final var exception = assertThrows(RuntimeException.class, () -> childMirror.run("run", (String) null));
         assertEquals(exception.getCause().getClass(), NullPointerException.class);
 
         assertEquals(childMirror.call(String.class, "call").get(), "callable");

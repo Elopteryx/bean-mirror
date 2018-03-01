@@ -191,9 +191,21 @@ public final class BeanMirror<T> {
      * @param clazz The type for the field
      * @return A new Function
      */
+    @SuppressWarnings("unchecked")
     public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
         try {
-            return createGetter(object, name, clazz);
+            final var type = type();
+            final var field = type.getDeclaredField(name);
+            final var modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
+            final var classToUse = (Class<R>) wrapper(clazz);
+            return obj -> classToUse.cast(varHandle.get(obj));
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -210,7 +222,18 @@ public final class BeanMirror<T> {
     @SuppressWarnings("unchecked")
     public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
         try {
-            return createStaticGetter((Class<T>) type(), name, clazz);
+            final var type = type();
+            final var field = type.getDeclaredField(name);
+            final var modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
+            final var classToUse = (Class<R>) wrapper(clazz);
+            return () -> classToUse.cast(varHandle.get());
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -227,7 +250,17 @@ public final class BeanMirror<T> {
      */
     public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
         try {
-            return createSetter(object, name, clazz);
+            final var type = type();
+            final var field = type.getDeclaredField(name);
+            final var modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
+            return varHandle::set;
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -244,7 +277,17 @@ public final class BeanMirror<T> {
     @SuppressWarnings("unchecked")
     public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
         try {
-            return createStaticSetter((Class<T>) type(), name, clazz);
+            final var type = type();
+            final var field = type.getDeclaredField(name);
+            final var modifiers = field.getModifiers();
+            final Lookup lookupToUse;
+            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
+                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
+            } else {
+                lookupToUse = lookup;
+            }
+            final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
+            return varHandle::set;
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -261,7 +304,7 @@ public final class BeanMirror<T> {
      * @return The same mirror instance
      */
     public BeanMirror<T> run(String name, Object... args) {
-        runMethod(object, name, args);
+        runMethod(name, args);
         return this;
     }
 
@@ -275,7 +318,7 @@ public final class BeanMirror<T> {
      * @return A new mirror instance, wrapping the returned value
      */
     public <R> BeanMirror<R> call(Class<R> clazz, String name, Object... args) {
-        final var result = callMethod(object, name, args);
+        final var result = callMethod(clazz, name, args);
         Objects.requireNonNull(result, "");
         return new BeanMirror<>(clazz.cast(result), lookup);
     }
@@ -324,123 +367,45 @@ public final class BeanMirror<T> {
         }
     }
 
-    private void setField(String fieldName, Object value) {
+    private void setField(String name, Object value) {
         try {
             final var clazz = type();
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
-            final var handle = privateLookup.findVarHandle(clazz, fieldName, value.getClass());
+            final var handle = privateLookup.findVarHandle(clazz, name, value.getClass());
             handle.set(object, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <R> Function<T, R> createGetter(Object target, String name, Class<R> clazz) {
-        try {
-            final var type = type(target);
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
-            final var classToUse = (Class<R>) wrapper(clazz);
-            return obj -> classToUse.cast(varHandle.get(obj));
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <R> Supplier<R> createStaticGetter(Class<T> target, String name, Class<R> clazz) {
-        try {
-            final var type = type(target);
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
-            final var classToUse = (Class<R>) wrapper(clazz);
-            return () -> classToUse.cast(varHandle.get());
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
-    private <R> BiConsumer<T, R> createSetter(Object target, String name, Class<R> clazz) {
-        try {
-            final var type = type(target);
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
-            return varHandle::set;
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
-    private <R> Consumer<R> createStaticSetter(Class<T> target, String name, Class<R> clazz) {
-        try {
-            final var type = type(target);
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
-            return varHandle::set;
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
-    }
-
     // METHODS
 
-    private void runMethod(Object object, String name, Object... args) throws BeanMirrorException {
+    private void runMethod(String name, Object... args) throws BeanMirrorException {
         try {
-            runOrCallMethod(false, object, name, args);
+            runOrCallMethod(null, name, args);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Object callMethod(Object object, String name, Object... args) {
+    private Object callMethod(Class<?> returnType, String name, Object... args) {
         try {
-            return runOrCallMethod(true, object, name, args);
+            return runOrCallMethod(returnType, name, args);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Object runOrCallMethod(boolean hasReturn, Object object, String name, Object... args) throws Throwable {
-        final var clazz = type(object);
+    private Object runOrCallMethod(Class<?> returnType, String name, Object... args) throws Throwable {
+        final var clazz = type();
         final var types = types(args);
-
+        final var hasReturn = returnType != null;
         final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
-        final var method = findMethod(object, name, types);
+        final var method = findMethod(name, types);
         final var methodHandle = privateLookup.unreflect(method);
-
         final var targetWithArgs = new Object[args.length + 1];
         targetWithArgs[0] = object;
         System.arraycopy(args, 0, targetWithArgs, 1, args.length);
-
         if (hasReturn) {
             return methodHandle.invokeWithArguments(targetWithArgs);
         } else {
@@ -449,12 +414,12 @@ public final class BeanMirror<T> {
         }
     }
 
-    private Method findMethod(Object object, String name, Class<?>[] types) {
+    private Method findMethod(String name, Class<?>[] types) {
         try {
-            return exactMethod(object, name, types);
+            return exactMethod(name, types);
         } catch (NoSuchMethodException e) {
             try {
-                return similarMethod(object, name, types);
+                return similarMethod(name, types);
             } catch (NoSuchMethodException e1) {
                 throw new BeanMirrorException(e1);
             }
@@ -468,28 +433,9 @@ public final class BeanMirror<T> {
      * Otherwise a private method with the exact same signature is returned.
      * If no exact match could be found, we let the {@code NoSuchMethodException} pass through.
      */
-    private Method exactMethod(Object object, String name, Class<?>[] types) throws NoSuchMethodException {
-        var type = type(object);
-
-        // first priority: find a public method with exact signature match in class hierarchy
-        try {
-            return type.getMethod(name, types);
-        }
-
-        // second priority: find a private method with exact signature match on declaring class
-        catch (NoSuchMethodException e) {
-            do {
-                try {
-                    return type.getDeclaredMethod(name, types);
-                }
-                catch (NoSuchMethodException ignore) {}
-
-                type = type.getSuperclass();
-            }
-            while (type != null);
-
-            throw e;
-        }
+    private Method exactMethod(String name, Class<?>[] types) throws NoSuchMethodException {
+        final var type = type();
+        return type.getDeclaredMethod(name, types);
     }
 
     /**
@@ -500,8 +446,8 @@ public final class BeanMirror<T> {
      * methods on the declaring class. If a method could be found, it is
      * returned, otherwise a {@code NoSuchMethodException} is thrown.
      */
-    private Method similarMethod(Object object, String name, Class<?>[] types) throws NoSuchMethodException {
-        var type = type(object);
+    private Method similarMethod(String name, Class<?>[] types) throws NoSuchMethodException {
+        final var type = type();
 
         // first priority: find a public method with a "similar" signature in class hierarchy
         // similar interpreted in when primitive argument types are converted to their wrappers
@@ -510,20 +456,13 @@ public final class BeanMirror<T> {
                 return method;
             }
         }
-
         // second priority: find a non-public method with a "similar" signature on declaring class
-        do {
-            for (var method : type.getDeclaredMethods()) {
-                if (isSimilarSignature(method, name, types)) {
-                    return method;
-                }
+        for (var method : type.getDeclaredMethods()) {
+            if (isSimilarSignature(method, name, types)) {
+                return method;
             }
-
-            type = type.getSuperclass();
         }
-        while (type != null);
-
-        throw new NoSuchMethodException("No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + type(object) + ".");
+        throw new NoSuchMethodException("No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + type() + ".");
     }
 
     /**
@@ -537,40 +476,31 @@ public final class BeanMirror<T> {
     private boolean match(Class<?>[] declaredTypes, Class<?>[] actualTypes) {
         if (declaredTypes.length == actualTypes.length) {
             for (var i = 0; i < actualTypes.length; i++) {
-                if (actualTypes[i] == NULL.class)
+                if (actualTypes[i] == NULL.class) {
                     continue;
-
-                if (wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i])))
+                }
+                if (wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i]))) {
                     continue;
-
+                }
                 return false;
             }
-
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
     // MISC
 
-    private Class<?> type(Object object) {
-        if (superType != null) {
-            return superType;
-        }
-        return object instanceof Class ? (Class<?>) object : object.getClass();
-    }
-
     private static Class<?>[] types(Object... values) {
         if (values == null) {
             return new Class[0];
         }
 
-        Class<?>[] result = new Class[values.length];
+        final var result = new Class[values.length];
 
         for (var i = 0; i < values.length; i++) {
-            var value = values[i];
+            final var value = values[i];
             result[i] = value == null ? NULL.class : value.getClass();
         }
 
