@@ -17,11 +17,8 @@ dependencies {
     testCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
 
     /* Test runner. */
-    testCompile "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
-    testRuntime "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
-    testRuntime "org.junit.platform:junit-platform-runner:$junitPlatformVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
 }
 
