@@ -116,8 +116,8 @@ class BeanMirrorTest {
 
         final var staticGetter = mirror.createStaticGetter("value", Long.class);
         assertEquals(staticGetter.get(), Long.valueOf(3L));
-        assertEquals(mirror.get("value", Long.class), (Long)3L);
+        assertEquals(mirror.getStatic("value", Long.class), (Long)3L);
         staticSetter.accept(4L);
-        assertEquals(mirror.get("value", Long.class), (Long)4L);
+        assertEquals(mirror.getStatic("value", Long.class), (Long)4L);
     }
 }
