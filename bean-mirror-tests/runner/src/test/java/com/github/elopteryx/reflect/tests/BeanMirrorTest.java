@@ -53,10 +53,7 @@ class BeanMirrorTest {
         final var lookup = MethodHandles.lookup();
         final var beanMirror = BeanMirror.of(target, lookup);
         final var getter = beanMirror.createGetter("b", char.class);
-        final var staticGetter = beanMirror.createStaticGetter("value", Long.class);
-
         assertEquals((char)getter.apply(target), 'b');
-        assertEquals(staticGetter.get(), Long.valueOf(3L));
 
         final var baseMirror = beanMirror.asType(Base.class);
         baseMirror.set("a", "changed a");
@@ -88,5 +85,39 @@ class BeanMirrorTest {
 
         assertEquals(childMirror.call(String.class, "call").get(), "callable");
 
+    }
+
+    @Test
+    void setField() {
+        final var lookup = MethodHandles.lookup();
+        final var mirror = BeanMirror.of(Base.class, lookup).create();
+
+        final var mirrorAfterSet = mirror.set("a", "b");
+
+        assertEquals(mirror, mirrorAfterSet);
+    }
+
+    @Test
+    void createSetter() {
+        final var lookup = MethodHandles.lookup();
+        final var mirror = BeanMirror.of(Base.class, lookup).create();
+        final var setter = mirror.createSetter("a", String.class);
+        final var bean = mirror.get();
+        setter.accept(bean, "b");
+
+        assertEquals(mirror.get("a", String.class), "b");
+    }
+
+    @Test
+    void createStaticSetter() {
+        final var lookup = MethodHandles.lookup();
+        final var mirror = BeanMirror.of(Target.class, lookup);
+        final var staticSetter = mirror.createStaticSetter("value", Long.class);
+
+        final var staticGetter = mirror.createStaticGetter("value", Long.class);
+        assertEquals(staticGetter.get(), Long.valueOf(3L));
+        assertEquals(mirror.get("value", Long.class), (Long)3L);
+        staticSetter.accept(4L);
+        assertEquals(mirror.get("value", Long.class), (Long)4L);
     }
 }

@@ -2,6 +2,7 @@ package com.github.elopteryx.reflect;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -260,7 +261,7 @@ public final class BeanMirror<T> {
                 lookupToUse = lookup;
             }
             final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
-            return varHandle::set;
+            return (target, value) -> varHandle.set((T)target, (R)value);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -287,7 +288,7 @@ public final class BeanMirror<T> {
                 lookupToUse = lookup;
             }
             final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
-            return varHandle::set;
+            return value -> varHandle.set((R)value);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -360,8 +361,14 @@ public final class BeanMirror<T> {
         try {
             final var clazz = type();
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
-            final var varHandle = privateLookup.findVarHandle(clazz, fieldName, fieldType);
-            return varHandle.get(object);
+            final VarHandle varHandle;
+            if (object instanceof Class) {
+                varHandle = privateLookup.findStaticVarHandle(clazz, fieldName, fieldType);
+                return varHandle.get();
+            } else {
+                varHandle = privateLookup.findVarHandle(clazz, fieldName, fieldType);
+                return varHandle.get(object);
+            }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
