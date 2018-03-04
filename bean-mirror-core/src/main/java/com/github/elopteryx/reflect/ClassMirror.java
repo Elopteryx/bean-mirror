@@ -1,12 +1,16 @@
 package com.github.elopteryx.reflect;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static com.github.elopteryx.reflect.internal.Utils.isSimilarSignature;
 import static com.github.elopteryx.reflect.internal.Utils.types;
 import static com.github.elopteryx.reflect.internal.Utils.wrapper;
 import static java.lang.invoke.MethodType.methodType;
@@ -176,6 +180,91 @@ public final class ClassMirror<T> {
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
+    }
+
+    // METHOD
+
+    /**
+     * Runs the static method of the current class, which is identified
+     * by its name and the given arguments. If the method has a return type,
+     * then it will be ignored.
+     * @param name The name of the method
+     * @param args The arguments which will be used for the invocation
+     * @return The same mirror instance
+     */
+    public ClassMirror<T> runStatic(String name, Object... args) {
+        try {
+            runOrCallMethod(void.class, name, args);
+            return this;
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    /**
+     * Calls the static method of the current object, which is identified
+     * by its name and the given arguments. The returned value will
+     * be wrapped into a new mirror instance, using its type.
+     * @param clazz The type of the return value
+     * @param name The name of the method
+     * @param args The arguments which will be used for the invocation
+     * @return A new mirror instance, wrapping the returned value
+     */
+    public <R> ObjectMirror<R> callStatic(Class<R> clazz, String name, Object... args) {
+        try {
+            final var result = runOrCallMethod(clazz, name, args);
+            Objects.requireNonNull(result, "");
+            return new ObjectMirror<>(clazz.cast(result), null, lookup);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    private Object runOrCallMethod(Class<?> returnType, String name, Object... args) throws Throwable {
+        final var hasReturn = returnType != void.class;
+        final var methodHandle = findMethod(returnType, name, args);
+        if (hasReturn) {
+            return methodHandle.invokeWithArguments(args);
+        } else {
+            methodHandle.invokeWithArguments(args);
+            return null;
+        }
+    }
+
+    private MethodHandle findMethod(Class<?> returnType, String name, Object[] args) throws Throwable {
+        final var types = types(args);
+        final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
+        try {
+            return privateLookup.findStatic(clazz, name, MethodType.methodType(returnType, types));
+        } catch (NoSuchMethodException e) {
+            try {
+                return similarMethod(lookup, name, types);
+            } catch (NoSuchMethodException e1) {
+                throw new BeanMirrorException(e1);
+            }
+        }
+    }
+
+    /**
+     * First public methods are searched in the class hierarchy, then private
+     * methods on the declaring class. If a method could be found, it is
+     * returned, otherwise a {@code NoSuchMethodException} is thrown.
+     */
+    private MethodHandle similarMethod(Lookup lookup, String name, Class<?>[] types) throws NoSuchMethodException, IllegalAccessException {
+        // first priority: find a public method with a "similar" signature in class hierarchy
+        // similar interpreted in when primitive argument types are converted to their wrappers
+        for (var method : clazz.getMethods()) {
+            if (isSimilarSignature(method, name, types)) {
+                return lookup.unreflect(method);
+            }
+        }
+        // second priority: find a non-public method with a "similar" signature on declaring class
+        for (var method : clazz.getDeclaredMethods()) {
+            if (isSimilarSignature(method, name, types)) {
+                return lookup.unreflect(method);
+            }
+        }
+        throw new NoSuchMethodException("No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + clazz + ".");
     }
 
     @Override

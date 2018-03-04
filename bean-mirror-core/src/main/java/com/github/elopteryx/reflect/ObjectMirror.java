@@ -1,8 +1,9 @@
 package com.github.elopteryx.reflect;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
@@ -209,8 +210,12 @@ public final class ObjectMirror<T> {
      * @return The same mirror instance
      */
     public ObjectMirror<T> run(String name, Object... args) {
-        runMethod(name, args);
-        return this;
+        try {
+            runOrCallMethod(void.class, name, args);
+            return this;
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
     }
 
     /**
@@ -223,34 +228,18 @@ public final class ObjectMirror<T> {
      * @return A new mirror instance, wrapping the returned value
      */
     public <R> ObjectMirror<R> call(Class<R> clazz, String name, Object... args) {
-        final var result = callMethod(clazz, name, args);
-        Objects.requireNonNull(result, "");
-        return new ObjectMirror<>(clazz.cast(result), null, lookup);
-    }
-
-    private void runMethod(String name, Object... args) throws BeanMirrorException {
         try {
-            runOrCallMethod(null, name, args);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Object callMethod(Class<?> returnType, String name, Object... args) {
-        try {
-            return runOrCallMethod(returnType, name, args);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+            final var result = runOrCallMethod(clazz, name, args);
+            Objects.requireNonNull(result, "");
+            return new ObjectMirror<>(clazz.cast(result), null, lookup);
+        } catch (Throwable throwable) {
+            throw new BeanMirrorException(throwable);
         }
     }
 
     private Object runOrCallMethod(Class<?> returnType, String name, Object... args) throws Throwable {
-        final var clazz = type();
-        final var types = types(args);
-        final var hasReturn = returnType != null;
-        final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
-        final var method = findMethod(name, types);
-        final var methodHandle = privateLookup.unreflect(method);
+        final var hasReturn = returnType != void.class;
+        final var methodHandle = findMethod(returnType, name, args);
         final var targetWithArgs = new Object[args.length + 1];
         targetWithArgs[0] = object;
         System.arraycopy(args, 0, targetWithArgs, 1, args.length);
@@ -262,12 +251,15 @@ public final class ObjectMirror<T> {
         }
     }
 
-    private Method findMethod(String name, Class<?>[] types) {
+    private MethodHandle findMethod(Class<?> returnType, String name, Object[] args) throws Throwable {
+        final var type = type();
+        final var types = types(args);
+        final var privateLookup = MethodHandles.privateLookupIn(type, lookup);
         try {
-            return exactMethod(name, types);
+            return privateLookup.findVirtual(type, name, MethodType.methodType(returnType, types));
         } catch (NoSuchMethodException e) {
             try {
-                return similarMethod(name, types);
+                return similarMethod(lookup, name, types);
             } catch (NoSuchMethodException e1) {
                 throw new BeanMirrorException(e1);
             }
@@ -275,36 +267,24 @@ public final class ObjectMirror<T> {
     }
 
     /**
-     * Searches a method with the exact same signature as desired.
-     * <p>
-     * If a public method is found in the class hierarchy, this method is returned.
-     * Otherwise a private method with the exact same signature is returned.
-     * If no exact match could be found, we let the {@code NoSuchMethodException} pass through.
-     */
-    private Method exactMethod(String name, Class<?>[] types) throws NoSuchMethodException {
-        final var type = type();
-        return type.getDeclaredMethod(name, types);
-    }
-
-    /**
      * First public methods are searched in the class hierarchy, then private
      * methods on the declaring class. If a method could be found, it is
      * returned, otherwise a {@code NoSuchMethodException} is thrown.
      */
-    private Method similarMethod(String name, Class<?>[] types) throws NoSuchMethodException {
+    private MethodHandle similarMethod(Lookup lookup, String name, Class<?>[] types) throws NoSuchMethodException, IllegalAccessException {
         final var type = type();
 
         // first priority: find a public method with a "similar" signature in class hierarchy
         // similar interpreted in when primitive argument types are converted to their wrappers
         for (var method : type.getMethods()) {
             if (isSimilarSignature(method, name, types)) {
-                return method;
+                return lookup.unreflect(method);
             }
         }
         // second priority: find a non-public method with a "similar" signature on declaring class
         for (var method : type.getDeclaredMethods()) {
             if (isSimilarSignature(method, name, types)) {
-                return method;
+                return lookup.unreflect(method);
             }
         }
         throw new NoSuchMethodException("No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + type() + ".");
