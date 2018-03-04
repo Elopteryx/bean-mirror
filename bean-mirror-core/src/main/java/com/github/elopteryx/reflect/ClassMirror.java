@@ -213,7 +213,7 @@ public final class ClassMirror<T> {
     public <R> ObjectMirror<R> callStatic(Class<R> clazz, String name, Object... args) {
         try {
             final var result = runOrCallMethod(clazz, name, args);
-            Objects.requireNonNull(result, "");
+            Objects.requireNonNull(result, "The value returned from the method call is null!");
             return new ObjectMirror<>(clazz.cast(result), null, lookup);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
@@ -221,14 +221,8 @@ public final class ClassMirror<T> {
     }
 
     private Object runOrCallMethod(Class<?> returnType, String name, Object... args) throws Throwable {
-        final var hasReturn = returnType != void.class;
         final var methodHandle = findMethod(returnType, name, args);
-        if (hasReturn) {
-            return methodHandle.invokeWithArguments(args);
-        } else {
-            methodHandle.invokeWithArguments(args);
-            return null;
-        }
+        return methodHandle.invokeWithArguments(args);
     }
 
     private MethodHandle findMethod(Class<?> returnType, String name, Object[] args) throws Throwable {
