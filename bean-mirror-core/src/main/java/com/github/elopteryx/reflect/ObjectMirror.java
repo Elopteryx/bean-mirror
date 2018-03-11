@@ -94,8 +94,9 @@ public final class ObjectMirror<T> {
      * @param clazz The type for the field
      * @return The value of the field
      */
+    @SuppressWarnings("unchecked")
     public <R> R get(String name, Class<R> clazz) {
-        return field(name, clazz).get();
+        return (R)getField(name, clazz);
     }
 
     /**

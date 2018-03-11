@@ -2,16 +2,9 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.17.0'
 }
 
-task testReport(type: TestReport, group: 'Build') {
-    description 'Generates an aggregate test report.'
-    destinationDir file("${buildDir}/reports/allTests")
-}
-
 subprojects {
 
     apply plugin: 'java'
-    apply plugin: 'idea'
-    apply plugin: 'eclipse'
     apply plugin: 'maven-publish'
     apply plugin: 'maven'
     apply plugin: 'signing'

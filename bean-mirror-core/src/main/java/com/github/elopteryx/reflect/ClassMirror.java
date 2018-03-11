@@ -80,8 +80,9 @@ public final class ClassMirror<T> {
      * @param clazz The type for the field
      * @return The value of the field
      */
+    @SuppressWarnings("unchecked")
     public <R> R getStatic(String name, Class<R> clazz) {
-        return staticField(name, clazz).get();
+        return (R)getField(name, clazz);
     }
 
     /**
