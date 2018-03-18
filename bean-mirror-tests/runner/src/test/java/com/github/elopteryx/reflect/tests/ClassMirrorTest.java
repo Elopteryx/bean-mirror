@@ -151,4 +151,25 @@ class ClassMirrorTest {
         final var mirror = BeanMirror.of(CallTarget.class, lookup);
         assertEquals(mirror.callStatic(String.class, "call").get(), "callable");
     }
+
+    private static class StandardObjectMethods {}
+
+    @Test
+    void forHashCode() {
+        final var mirror = BeanMirror.of(StandardObjectMethods.class, lookup);
+        assertEquals(mirror.hashCode(), StandardObjectMethods.class.hashCode());
+    }
+
+    @Test
+    void forEquals() {
+        final var mirror = BeanMirror.of(StandardObjectMethods.class, lookup);
+        final var otherMirror = BeanMirror.of(StandardObjectMethods.class, lookup);
+        assertEquals(mirror, otherMirror);
+    }
+
+    @Test
+    void forToString() {
+        final var mirror = BeanMirror.of(StandardObjectMethods.class, lookup);
+        assertEquals(mirror.toString(), StandardObjectMethods.class.toString());
+    }
 }

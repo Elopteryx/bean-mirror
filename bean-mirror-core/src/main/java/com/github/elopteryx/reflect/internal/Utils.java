@@ -12,8 +12,8 @@ public final class Utils {
      * Determines if a method has a "similar" signature, especially if wrapping
      * primitive argument types would result in an exactly matching signature.
      */
-    public static boolean isSimilarSignature(Method possiblyMatchingMethod, String desiredMethodName, Class<?>[] desiredParamTypes) {
-        return possiblyMatchingMethod.getName().equals(desiredMethodName) && match(possiblyMatchingMethod.getParameterTypes(), desiredParamTypes);
+    public static boolean isSimilarSignature(Method candidateMethod, String methodName, Class<?>[] paramTypes) {
+        return candidateMethod.getName().equals(methodName) && match(candidateMethod.getParameterTypes(), paramTypes);
     }
 
     private static boolean match(Class<?>[] declaredTypes, Class<?>[] actualTypes) {
