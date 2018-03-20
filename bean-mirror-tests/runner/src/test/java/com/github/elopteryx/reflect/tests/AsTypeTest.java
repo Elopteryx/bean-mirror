@@ -23,6 +23,8 @@ class AsTypeTest {
     @SuppressWarnings("unused")
     private static class Child implements Parent {
 
+        private char c = 'c';
+
         @Override
         public int call() {
             return 1;
@@ -32,6 +34,8 @@ class AsTypeTest {
     @SuppressWarnings("unused")
     private static class GrandChild extends Child {
 
+        private char c = 'g';
+
         @Override
         public int call() {
             return 2;
@@ -39,7 +43,17 @@ class AsTypeTest {
     }
 
     @Test
-    void asTypeWithInterface() {
+    void asTypeFieldWithTwoLevels() {
+        final var grandChildValue = BeanMirror.of(new GrandChild(), lookup).get("c", char.class);
+        final var childValue = BeanMirror.of(new GrandChild(), lookup).asType(Child.class).get("c", char.class);
+
+        assertAll(
+                () -> assertEquals('g', (char)grandChildValue),
+                () -> assertEquals('c', (char)childValue));
+    }
+
+    @Test
+    void asTypeMethodWithTwoLevels() {
         final var childValue = BeanMirror.of(new Child(), lookup).call(int.class, "call").get();
         final var parentValue = BeanMirror.of(new Child(), lookup).asType(Parent.class).call(int.class, "call").get();
 
@@ -49,13 +63,13 @@ class AsTypeTest {
     }
 
     @Test
-    void asTypeWithThreeLevels() {
+    void asTypeMethodWithThreeLevels() {
         final var grandChildValue = BeanMirror.of(new GrandChild(), lookup).call(int.class, "call").get();
         final var childValue = BeanMirror.of(new GrandChild(), lookup).asType(Child.class).call(int.class, "call").get();
         final var parentValue = BeanMirror.of(new GrandChild(), lookup).asType(Parent.class).call(int.class, "call").get();
 
         assertAll(
-                //() -> assertEquals(0, (int)parentValue),
+                () -> assertEquals(0, (int)parentValue),
                 () -> assertEquals(1, (int)childValue),
                 () -> assertEquals(2, (int)grandChildValue));
     }
