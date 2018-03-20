@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
@@ -228,11 +229,12 @@ public final class ObjectMirror<T> {
      * @param args The arguments which will be used for the invocation
      * @return A new mirror instance, wrapping the returned value
      */
+    @SuppressWarnings("unchecked")
     public <R> ObjectMirror<R> call(Class<R> clazz, String name, Object... args) {
         try {
             final var result = runOrCallMethod(clazz, name, args);
             Objects.requireNonNull(result, "The value returned from the method call is null!");
-            return new ObjectMirror<>(clazz.cast(result), null, lookup);
+            return new ObjectMirror<>(((Class<R>)wrapper(clazz)).cast(result), null, lookup);
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -240,10 +242,15 @@ public final class ObjectMirror<T> {
 
     private Object runOrCallMethod(Class<?> returnType, String name, Object... args) throws Throwable {
         final var methodHandle = findMethod(returnType, name, args);
-        final var targetWithArgs = new Object[args.length + 1];
-        targetWithArgs[0] = object;
-        System.arraycopy(args, 0, targetWithArgs, 1, args.length);
-        return methodHandle.invokeWithArguments(targetWithArgs);
+        final var type = type();
+        if (type.isInterface() || superType != null) {
+            return methodHandle.invokeWithArguments(args);
+        } else {
+            final var targetWithArgs = new Object[args.length + 1];
+            targetWithArgs[0] = object;
+            System.arraycopy(args, 0, targetWithArgs, 1, args.length);
+            return methodHandle.invokeWithArguments(targetWithArgs);
+        }
     }
 
     private MethodHandle findMethod(Class<?> returnType, String name, Object[] args) throws Throwable {
@@ -251,14 +258,23 @@ public final class ObjectMirror<T> {
         final var types = types(args);
         final var privateLookup = MethodHandles.privateLookupIn(type, lookup);
         try {
-            return privateLookup.findVirtual(type, name, MethodType.methodType(returnType, types));
+            if (type.isInterface() || superType != null) {
+                final var method = similarMethod(name, types);
+                return privateLookup.unreflectSpecial(method, type).bindTo(object);
+            } else {
+                return privateLookup.findVirtual(type, name, MethodType.methodType(returnType, types));
+            }
         } catch (NoSuchMethodException e) {
             try {
-                return similarMethod(lookup, name, types);
+                return similarMethodHandle(lookup, name, types);
             } catch (NoSuchMethodException e1) {
                 throw new BeanMirrorException(e1);
             }
         }
+    }
+
+    private MethodHandle similarMethodHandle(Lookup lookup, String name, Class<?>[] types) throws NoSuchMethodException, IllegalAccessException {
+        return lookup.unreflect(similarMethod(name, types));
     }
 
     /**
@@ -266,20 +282,20 @@ public final class ObjectMirror<T> {
      * methods on the declaring class. If a method could be found, it is
      * returned, otherwise a {@code NoSuchMethodException} is thrown.
      */
-    private MethodHandle similarMethod(Lookup lookup, String name, Class<?>[] types) throws NoSuchMethodException, IllegalAccessException {
+    private Method similarMethod(String name, Class<?>[] types) throws NoSuchMethodException {
         final var type = type();
 
         // first priority: find a public method with a "similar" signature in class hierarchy
         // similar interpreted in when primitive argument types are converted to their wrappers
         for (var method : type.getMethods()) {
             if (isSimilarSignature(method, name, types)) {
-                return lookup.unreflect(method);
+                return method;
             }
         }
         // second priority: find a non-public method with a "similar" signature on declaring class
         for (var method : type.getDeclaredMethods()) {
             if (isSimilarSignature(method, name, types)) {
-                return lookup.unreflect(method);
+                return method;
             }
         }
         throw new NoSuchMethodException("No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + type() + ".");
