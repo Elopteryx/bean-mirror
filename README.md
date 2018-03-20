@@ -15,12 +15,11 @@ Features
 --------
 * Fluent API
 * Type-safe
-* Compact
 * Modularized
 
 Requirements
 --------
-* Java 10 (it will be changed to the next LTS version (11) when it comes out)
+* Java 10+
 
 Motivation
 --------
@@ -28,7 +27,11 @@ Motivation
 There are several reflection based libraries which allow the developers to easily manipulate objects
 during runtime. What separates this library is that it uses the newer API (java.lang.invoke) which allows
 faster code if used properly, compared to the classic java.lang.reflect package.
+
 Because several additions have been added in Java 9 setting the minimum required Java version to anything
 lower is not feasible (it would not make sense to create another library, which would not be any different
-from the existing ones). On the other hand the Java release schedule has been changed and the next version
-which will receive long-term-support is 11, therefore the plan is to make that version the base line.
+from the existing ones).
+
+Because of the new Java release schedule this library is compiled to version 10 and newer versions are
+expected to be compiled to 11 when it comes out. After that, as Java 11 will be on long-term support the
+library should also stay on that.
