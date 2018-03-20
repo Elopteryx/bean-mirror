@@ -242,8 +242,7 @@ public final class ObjectMirror<T> {
 
     private Object runOrCallMethod(Class<?> returnType, String name, Object... args) throws Throwable {
         final var methodHandle = findMethod(returnType, name, args);
-        final var type = type();
-        if (type.isInterface() || superType != null) {
+        if (superType != null) {
             return methodHandle.invokeWithArguments(args);
         } else {
             final var targetWithArgs = new Object[args.length + 1];
@@ -258,7 +257,7 @@ public final class ObjectMirror<T> {
         final var types = types(args);
         final var privateLookup = MethodHandles.privateLookupIn(type, lookup);
         try {
-            if (type.isInterface() || superType != null) {
+            if (superType != null) {
                 final var method = similarMethod(name, types);
                 return privateLookup.unreflectSpecial(method, type).bindTo(object);
             } else {
