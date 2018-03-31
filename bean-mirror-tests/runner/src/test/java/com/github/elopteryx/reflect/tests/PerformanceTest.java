@@ -1,5 +1,6 @@
 package com.github.elopteryx.reflect.tests;
 
+import com.github.elopteryx.reflect.BeanMirror;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -16,7 +17,9 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
+@SuppressWarnings("unused")
 @Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 5, time = 1)
 @Fork(3)
@@ -33,21 +36,24 @@ public class PerformanceTest {
 
     private int value4 = 42;
 
+    //private static final PerformanceTest INSTANCE = new PerformanceTest();
+
     private static final Field static_reflective;
-    private static final MethodHandle static_unreflect;
+    private static final MethodHandle static_unReflect;
     private static final MethodHandle static_mh;
+    private static final Function<PerformanceTest, Integer> static_getter;
 
     private static Field reflective;
-    private static MethodHandle unreflect;
+    private static MethodHandle unReflect;
     private static MethodHandle mh;
+    private static Function<PerformanceTest, Integer> getter;
 
     private static Map<String, Object> accessors = new HashMap<>();
 
-    // We would normally use @Setup, but we need to initialize "static final" fields here...
     static {
         try {
             reflective = PerformanceTest.class.getDeclaredField("value");
-            unreflect = MethodHandles.lookup().unreflectGetter(reflective);
+            unReflect = MethodHandles.lookup().unreflectGetter(reflective);
             mh = MethodHandles.lookup().findGetter(PerformanceTest.class, "value", int.class);
 
             var reflective2 = PerformanceTest.class.getDeclaredField("value2");
@@ -59,8 +65,11 @@ public class PerformanceTest {
             var mh4 = MethodHandles.lookup().findGetter(PerformanceTest.class, "value4", int.class);
             accessors.put("value4", mh4);
 
+            getter = BeanMirror.of(new PerformanceTest(), MethodHandles.lookup()).createGetter("value", Integer.class);
+            static_getter = getter;
+
             static_reflective = reflective;
-            static_unreflect = unreflect;
+            static_unReflect = unReflect;
             static_mh = mh;
 
         } catch (IllegalAccessException | NoSuchFieldException e) {
@@ -94,12 +103,12 @@ public class PerformanceTest {
 
     @Benchmark
     public int dynamic_unreflect_invoke() throws Throwable {
-        return (int) unreflect.invoke(this);
+        return (int) unReflect.invoke(this);
     }
 
     @Benchmark
     public int dynamic_unreflect_invokeExact() throws Throwable {
-        return (int) unreflect.invokeExact(this);
+        return (int) unReflect.invokeExact(this);
     }
 
     @Benchmark
@@ -147,12 +156,12 @@ public class PerformanceTest {
 
     @Benchmark
     public int static_unreflect_invoke() throws Throwable {
-        return (int) static_unreflect.invoke(this);
+        return (int) static_unReflect.invoke(this);
     }
 
     @Benchmark
     public int static_unreflect_invokeExact() throws Throwable {
-        return (int) static_unreflect.invokeExact(this);
+        return (int) static_unReflect.invokeExact(this);
     }
 
     @Benchmark
@@ -163,6 +172,16 @@ public class PerformanceTest {
     @Benchmark
     public int static_mh_invokeExact() throws Throwable {
         return (int) static_mh.invokeExact(this);
+    }
+
+    @Benchmark
+    public int getter_apply() {
+        return getter.apply(this);
+    }
+
+    @Benchmark
+    public int static_getter_apply() {
+        return static_getter.apply(this);
     }
 
 }

@@ -1,6 +1,9 @@
 package com.github.elopteryx.reflect.tests;
 
 import com.github.elopteryx.reflect.BeanMirror;
+import com.github.elopteryx.reflect.tests.astype.Child;
+import com.github.elopteryx.reflect.tests.astype.GrandChild;
+import com.github.elopteryx.reflect.tests.astype.Parent;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodHandles;
@@ -11,36 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AsTypeTest {
 
     private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-    @SuppressWarnings("unused")
-    private interface Parent {
-
-        default int call() {
-            return 0;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    private static class Child implements Parent {
-
-        private char c = 'c';
-
-        @Override
-        public int call() {
-            return 1;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    private static class GrandChild extends Child {
-
-        private char c = 'g';
-
-        @Override
-        public int call() {
-            return 2;
-        }
-    }
 
     @Test
     void asTypeFieldWithTwoLevels() {
