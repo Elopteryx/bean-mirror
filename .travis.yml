@@ -21,3 +21,6 @@ env:
 
 script:
   - ./gradlew build
+
+after_success:
+  - ./gradlew coveralls

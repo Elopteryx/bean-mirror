@@ -13,8 +13,8 @@ dependencies {
     testCompile project(":bean-mirror-tests:client")
 
     /* Performance benchmark tool. */
-    testCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
-    testCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+    compile "org.openjdk.jmh:jmh-core:$jmhVersion"
+    annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
 
     /* Test runner. */
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
