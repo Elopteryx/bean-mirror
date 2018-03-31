@@ -55,6 +55,7 @@ public final class ObjectMirror<T> {
      * super type. Useful if the child type has redefined ('shadowed') a
      * property with the same name.
      * @param clazz The type to be used
+     * @param <R> The generic type
      * @return A new mirror instance, using the given type
      */
     @SuppressWarnings("unchecked")
@@ -93,6 +94,7 @@ public final class ObjectMirror<T> {
      * Gets the value of the field, identified by its name.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return The value of the field
      */
     @SuppressWarnings("unchecked")
@@ -115,6 +117,7 @@ public final class ObjectMirror<T> {
      * Switches over to the field, identified by its name.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return A new mirror instance, wrapping the field
      */
     public <R> ObjectMirror<R> field(String name, Class<R> clazz) {
@@ -152,6 +155,7 @@ public final class ObjectMirror<T> {
      * be the same as the given class type.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return A new Function
      */
     @SuppressWarnings("unchecked")
@@ -181,6 +185,7 @@ public final class ObjectMirror<T> {
      * be the same as the given class type.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return A new BiConsumer
      */
     public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
@@ -227,6 +232,7 @@ public final class ObjectMirror<T> {
      * @param clazz The type of the return value
      * @param name The name of the method
      * @param args The arguments which will be used for the invocation
+     * @param <R> The generic type
      * @return A new mirror instance, wrapping the returned value
      */
     @SuppressWarnings("unchecked")

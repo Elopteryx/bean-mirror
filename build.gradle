@@ -55,7 +55,7 @@ subprojects {
                 docEncoding 'UTF-8'
                 failOnError true
                 links = [
-                        'http://download.oracle.com/javase/9/docs/api/'
+                        'http://download.oracle.com/javase/10/docs/api/'
                 ]
             }
         }
@@ -68,8 +68,6 @@ subprojects {
 
     artifacts {
         archives jar
-        archives sourcesJar
-        // archives javadocJar
     }
 
     jacoco {

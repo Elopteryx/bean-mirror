@@ -14,6 +14,7 @@ public final class BeanMirror {
      * Creates a new mirror instance, wrapping the given object.
      * @param object The object to be wrapped
      * @param lookup User-supplied lookup for access check
+     * @param <T> The generic type
      * @return A new mirror instance
      */
     public static <T> ObjectMirror<T> of(T object, Lookup lookup) {
@@ -26,6 +27,7 @@ public final class BeanMirror {
      * Creates a new mirror instance, wrapping the given class object.
      * @param clazz The class to be wrapped
      * @param lookup User-supplied lookup for access check
+     * @param <T> The generic type
      * @return A new mirror instance
      */
     public static <T> ClassMirror<T> of(Class<T> clazz, Lookup lookup) {

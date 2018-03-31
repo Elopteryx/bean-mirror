@@ -78,6 +78,7 @@ public final class ClassMirror<T> {
      * Gets the value of the field, identified by its name.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return The value of the field
      */
     @SuppressWarnings("unchecked")
@@ -100,6 +101,7 @@ public final class ClassMirror<T> {
      * Switches over to the field, identified by its name.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return A new mirror instance, wrapping the field
      */
     public <R> ObjectMirror<R> staticField(String name, Class<R> clazz) {
@@ -134,6 +136,7 @@ public final class ClassMirror<T> {
      * type will be the same as the given class type.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return A new Supplier
      */
     @SuppressWarnings("unchecked")
@@ -162,6 +165,7 @@ public final class ClassMirror<T> {
      * type will be the same as the given class type.
      * @param name The name of the field
      * @param clazz The type for the field
+     * @param <R> The generic type
      * @return A new Consumer
      */
     @SuppressWarnings("unchecked")
@@ -209,6 +213,7 @@ public final class ClassMirror<T> {
      * @param clazz The type of the return value
      * @param name The name of the method
      * @param args The arguments which will be used for the invocation
+     * @param <R> The generic type
      * @return A new mirror instance, wrapping the returned value
      */
     public <R> ObjectMirror<R> callStatic(Class<R> clazz, String name, Object... args) {
