@@ -1,15 +1,18 @@
 package com.github.elopteryx.reflect;
 
+import com.github.elopteryx.reflect.internal.Functional;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.github.elopteryx.reflect.internal.Utils.isSimilarSignature;
 import static com.github.elopteryx.reflect.internal.Utils.types;
@@ -160,22 +163,23 @@ public final class ObjectMirror<T> {
      */
     @SuppressWarnings("unchecked")
     public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
-        try {
-            final var type = type();
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
-            final var classToUse = (Class<R>) wrapper(clazz);
-            return obj -> classToUse.cast(varHandle.get(obj));
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
+        final var type = type();
+        return Functional.createGetter(name, lookup, (Class<T>) type, clazz);
+    }
+
+    /**
+     * Creates a new supplier which can be used to get the value of
+     * the static field for the current type. The return
+     * type will be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @param <R> The generic type
+     * @return A new Supplier
+     */
+    @SuppressWarnings("unchecked")
+    public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
+        final var type = type();
+        return Functional.createStaticGetter(name, lookup, type, clazz);
     }
 
     /**
@@ -188,22 +192,25 @@ public final class ObjectMirror<T> {
      * @param <R> The generic type
      * @return A new BiConsumer
      */
+    @SuppressWarnings("unchecked")
     public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
-        try {
-            final var type = type();
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findVarHandle(type, name, clazz);
-            return (target, value) -> varHandle.set((T)target, (R)value);
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
+        final var type = type();
+        return Functional.createSetter(name, lookup, (Class<T>) type, clazz);
+    }
+
+    /**
+     * Creates a new consumer which can be used to set the value of
+     * the static field for the current type. The generic
+     * type will be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @param <R> The generic type
+     * @return A new Consumer
+     */
+    @SuppressWarnings("unchecked")
+    public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
+        final var type = type();
+        return Functional.createStaticSetter(name, lookup, type, clazz);
     }
 
     // METHOD

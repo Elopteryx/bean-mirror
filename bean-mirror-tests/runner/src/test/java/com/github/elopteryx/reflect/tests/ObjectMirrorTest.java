@@ -148,6 +148,45 @@ class ObjectMirrorTest {
     }
 
     @SuppressWarnings("unused")
+    private static class GetterSetterTargetStatic {
+        private static String value;
+
+        private static void init() {
+            GetterSetterTargetStatic.value = "";
+        }
+    }
+
+    @Test
+    void createStaticGetterAndSetter() {
+        final var mirror = BeanMirror.of(new GetterSetterTargetStatic(), lookup);
+        final var getter = mirror.createStaticGetter("value", String.class);
+        final var setter = mirror.createStaticSetter("value", String.class);
+        assertAll(
+                () -> {
+                    GetterSetterTargetStatic.init();
+                    assertEquals("", GetterSetterTargetStatic.value);
+                    assertEquals("", getter.get());
+                },
+                () -> {
+                    setter.accept("a");
+                    assertEquals("a", GetterSetterTargetStatic.value);
+                    assertEquals("a", getter.get());
+                },
+                () -> {
+                    setter.accept("b");
+                    assertEquals("b", GetterSetterTargetStatic.value);
+                    assertEquals("b", getter.get());
+                },
+                () -> {
+                    setter.accept("c");
+                    assertEquals("c", GetterSetterTargetStatic.value);
+                    assertEquals("c", getter.get());
+                }
+        );
+    }
+
+
+    @SuppressWarnings("unused")
     private static class RunTarget {
 
         public void run(String param) {

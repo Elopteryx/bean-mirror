@@ -1,12 +1,18 @@
 package com.github.elopteryx.reflect.tests.internal;
 
+import com.github.elopteryx.reflect.BeanMirror;
+import com.github.elopteryx.reflect.BeanMirrorException;
 import com.github.elopteryx.reflect.internal.NULL;
 import com.github.elopteryx.reflect.internal.Utils;
 import org.junit.jupiter.api.Test;
 
+import java.lang.invoke.MethodHandles;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UtilsTest {
@@ -23,11 +29,25 @@ class UtilsTest {
     }
 
     @Test
+    void createUtils() {
+        final var exception = assertThrows(BeanMirrorException.class,
+                () -> BeanMirror.of(Utils.class, MethodHandles.lookup()).create());
+        assertEquals(UnsupportedOperationException.class, exception.getCause().getCause().getClass());
+    }
+
+    @Test
     void useIsSimilarSignature() throws Exception {
+        final var emptyMethod = ParameterTypes.class.getDeclaredMethod("empty");
+        assertFalse(Utils.isSimilarSignature(emptyMethod, "empty_", new Class[0]));
+        assertFalse(Utils.isSimilarSignature(emptyMethod, "empty", new Class[]{Integer.class}));
+
         final var runMethod = ParameterTypes.class.getDeclaredMethod("run", int.class);
         assertTrue(Utils.isSimilarSignature(runMethod, "run", new Class[]{Integer.class}));
+        assertFalse(Utils.isSimilarSignature(runMethod, "run", new Class[]{Long.class}));
+
         final var callMethod = ParameterTypes.class.getDeclaredMethod("call", Boolean.class);
         assertTrue(Utils.isSimilarSignature(callMethod, "call", new Class[]{Boolean.class}));
+        assertTrue(Utils.isSimilarSignature(callMethod, "call", new Class[]{boolean.class}));
     }
 
     @Test

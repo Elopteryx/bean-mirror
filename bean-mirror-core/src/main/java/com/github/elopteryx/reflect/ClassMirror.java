@@ -1,18 +1,20 @@
 package com.github.elopteryx.reflect;
 
+import com.github.elopteryx.reflect.internal.Functional;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.elopteryx.reflect.internal.Utils.isSimilarSignature;
 import static com.github.elopteryx.reflect.internal.Utils.types;
-import static com.github.elopteryx.reflect.internal.Utils.wrapper;
 import static java.lang.invoke.MethodType.methodType;
 
 /**
@@ -131,6 +133,21 @@ public final class ClassMirror<T> {
     }
 
     /**
+     * Creates a new function which can be used to get the value of
+     * field for the object given to the function. The first generic
+     * type will be the same as the current type, the second type will
+     * be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @param <R> The generic type
+     * @return A new Function
+     */
+    public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
+        final var type = this.clazz;
+        return Functional.createGetter(name, lookup, type, clazz);
+    }
+
+    /**
      * Creates a new supplier which can be used to get the value of
      * the static field for the current type. The return
      * type will be the same as the given class type.
@@ -139,24 +156,24 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new Supplier
      */
-    @SuppressWarnings("unchecked")
     public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
-        try {
-            final var type = this.clazz;
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
-            final var classToUse = (Class<R>) wrapper(clazz);
-            return () -> classToUse.cast(varHandle.get());
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
+        final var type = this.clazz;
+        return Functional.createStaticGetter(name, lookup, type, clazz);
+    }
+
+    /**
+     * Creates a new bi-consumer which can be used to set the value of
+     * field for the object given to the function. The first generic
+     * type will be the same as the current type, the second type will
+     * be the same as the given class type.
+     * @param name The name of the field
+     * @param clazz The type for the field
+     * @param <R> The generic type
+     * @return A new BiConsumer
+     */
+    public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
+        final var type = this.clazz;
+        return Functional.createSetter(name, lookup, type, clazz);
     }
 
     /**
@@ -168,23 +185,9 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new Consumer
      */
-    @SuppressWarnings("unchecked")
     public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
-        try {
-            final var type = this.clazz;
-            final var field = type.getDeclaredField(name);
-            final var modifiers = field.getModifiers();
-            final Lookup lookupToUse;
-            if (Modifier.isPrivate(modifiers) && field.trySetAccessible()) {
-                lookupToUse = MethodHandles.privateLookupIn(type, lookup);
-            } else {
-                lookupToUse = lookup;
-            }
-            final var varHandle = lookupToUse.findStaticVarHandle(type, name, clazz);
-            return value -> varHandle.set((R)value);
-        } catch (Throwable throwable) {
-            throw new BeanMirrorException(throwable);
-        }
+        final var type = this.clazz;
+        return Functional.createStaticSetter(name, lookup, type, clazz);
     }
 
     // METHOD

@@ -21,6 +21,7 @@ class BeanMirrorTest {
 
     @Test
     void createObjectMirrorWithNullParams() {
+        assertThrows(NullPointerException.class, () -> BeanMirror.of((Object)null));
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Object)null, MethodHandles.lookup()));
         assertThrows(NullPointerException.class, () -> BeanMirror.of(new Object(), null));
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Object)null, null));
@@ -34,6 +35,7 @@ class BeanMirrorTest {
 
     @Test
     void createClassMirrorWithNullParams() {
+        assertThrows(NullPointerException.class, () -> BeanMirror.of((Class<?>)null));
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Class<?>)null, MethodHandles.lookup()));
         assertThrows(NullPointerException.class, () -> BeanMirror.of(Object.class, null));
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Class<?>)null, null));

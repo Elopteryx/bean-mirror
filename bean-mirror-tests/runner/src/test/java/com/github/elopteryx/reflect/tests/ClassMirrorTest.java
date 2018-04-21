@@ -86,37 +86,111 @@ class ClassMirrorTest {
 
     @SuppressWarnings("unused")
     private static class GetterSetterTarget {
+        private String value;
+
+        private GetterSetterTarget() {
+            this("");
+        }
+
+        private GetterSetterTarget(String value) {
+            this.value = value;
+        }
+
+        private String getValue() {
+            return value;
+        }
+    }
+
+    @Test
+    void createGetter() {
+        final var getter = BeanMirror.of(GetterSetterTarget.class, lookup).createGetter("value", String.class);
+        assertAll(
+                () -> assertEquals(getter.apply(new GetterSetterTarget()), ""),
+                () -> assertEquals(getter.apply(new GetterSetterTarget("a")), "a"),
+                () -> assertEquals(getter.apply(new GetterSetterTarget("b")), "b")
+        );
+    }
+
+    @Test
+    void createSetter() {
+        final var target = new GetterSetterTarget();
+        final var setter = BeanMirror.of(GetterSetterTarget.class, lookup).createSetter("value", String.class);
+        assertAll(
+                () -> assertEquals("", target.getValue()),
+                () -> {
+                    setter.accept(target, "a");
+                    assertEquals("a", target.getValue());
+                },
+                () -> {
+                    setter.accept(target, "b");
+                    assertEquals("b", target.getValue());
+                },
+                () -> {
+                    setter.accept(target, "c");
+                    assertEquals("c", target.getValue());
+                }
+        );
+    }
+
+    @Test
+    void createGetterAndSetter() {
+        final var target = new GetterSetterTarget();
+        final var mirror = BeanMirror.of(target, lookup);
+        final var getter = mirror.createGetter("value", String.class);
+        final var setter = mirror.createSetter("value", String.class);
+        assertAll(
+                () -> assertEquals("", target.getValue()),
+                () -> {
+                    setter.accept(target, "a");
+                    assertEquals("a", target.getValue());
+                    assertEquals("a", getter.apply(target));
+                },
+                () -> {
+                    setter.accept(target, "b");
+                    assertEquals("b", target.getValue());
+                    assertEquals("b", getter.apply(target));
+                },
+                () -> {
+                    setter.accept(target, "c");
+                    assertEquals("c", target.getValue());
+                    assertEquals("c", getter.apply(target));
+                }
+        );
+    }
+
+    @SuppressWarnings("unused")
+    private static class GetterSetterTargetStatic {
         private static String value;
 
         private static void init() {
-            GetterSetterTarget.value = "";
+            GetterSetterTargetStatic.value = "";
         }
     }
 
     @Test
     void createStaticGetterAndSetter() {
-        final var mirror = BeanMirror.of(GetterSetterTarget.class, lookup);
+        final var mirror = BeanMirror.of(GetterSetterTargetStatic.class, lookup);
         final var getter = mirror.createStaticGetter("value", String.class);
         final var setter = mirror.createStaticSetter("value", String.class);
         assertAll(
                 () -> {
-                    GetterSetterTarget.init();
-                    assertEquals("", GetterSetterTarget.value);
+                    GetterSetterTargetStatic.init();
+                    assertEquals("", GetterSetterTargetStatic.value);
                     assertEquals("", getter.get());
                 },
                 () -> {
                     setter.accept("a");
-                    assertEquals("a", GetterSetterTarget.value);
+                    assertEquals("a", GetterSetterTargetStatic.value);
                     assertEquals("a", getter.get());
                 },
                 () -> {
                     setter.accept("b");
-                    assertEquals("b", GetterSetterTarget.value);
+                    assertEquals("b", GetterSetterTargetStatic.value);
                     assertEquals("b", getter.get());
                 },
                 () -> {
                     setter.accept("c");
-                    assertEquals("c", GetterSetterTarget.value);
+                    assertEquals("c", GetterSetterTargetStatic.value);
                     assertEquals("c", getter.get());
                 }
         );

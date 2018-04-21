@@ -6,6 +6,7 @@ public final class Utils {
 
     private Utils() {
         // No need to instantiate.
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -13,28 +14,27 @@ public final class Utils {
      * primitive argument types would result in an exactly matching signature.
      * @param candidateMethod The method to be checked
      * @param methodName The user supplied name
-     * @param paramTypes The parameter types
+     * @param actualTypes The parameter types
      * @return Whether the method matches the search
      */
-    public static boolean isSimilarSignature(Method candidateMethod, String methodName, Class<?>[] paramTypes) {
-        return candidateMethod.getName().equals(methodName) && match(candidateMethod.getParameterTypes(), paramTypes);
-    }
-
-    private static boolean match(Class<?>[] declaredTypes, Class<?>[] actualTypes) {
-        if (declaredTypes.length == actualTypes.length) {
-            for (var i = 0; i < actualTypes.length; i++) {
-                if (actualTypes[i] == NULL.class) {
-                    continue;
-                }
-                if (wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i]))) {
-                    continue;
-                }
-                return false;
-            }
-            return true;
-        } else {
+    public static boolean isSimilarSignature(Method candidateMethod, String methodName, Class<?>[] actualTypes) {
+        if (!candidateMethod.getName().equals(methodName)) {
             return false;
         }
+        final var declaredTypes = candidateMethod.getParameterTypes();
+        if (declaredTypes.length != actualTypes.length) {
+            return false;
+        }
+        for (var i = 0; i < actualTypes.length; i++) {
+            if (actualTypes[i] == NULL.class) {
+                continue;
+            }
+            if (wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i]))) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     public static Class<?>[] types(Object... values) {
