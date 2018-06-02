@@ -3,6 +3,9 @@ plugins {
     id "com.github.kt3k.coveralls" version '2.8.2'
 }
 
+apply plugin: "com.github.kt3k.coveralls"
+apply plugin: "jacoco"
+
 task testReport(type: TestReport, group: 'Build') {
     description 'Generates an aggregate test report.'
     destinationDir file("${buildDir}/reports/allTests")
