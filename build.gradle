@@ -121,7 +121,7 @@ task jacocoRootReport(type: JacocoReport, group: "Coverage reports") {
     additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
     classDirectories = files(subprojects.sourceSets.main.output)
-    executionData = files(subprojects.jacocoTestReport.executionData)
+    executionData jacocoMerge.destinationFile
 
     reports {
         html.enabled = true
