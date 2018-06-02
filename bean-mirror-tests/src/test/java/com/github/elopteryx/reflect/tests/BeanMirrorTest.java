@@ -1,6 +1,5 @@
 package com.github.elopteryx.reflect.tests;
 
-import com.company.client.Client;
 import com.github.elopteryx.reflect.BeanMirror;
 import org.junit.jupiter.api.Test;
 
@@ -39,18 +38,5 @@ class BeanMirrorTest {
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Class<?>)null, MethodHandles.lookup()));
         assertThrows(NullPointerException.class, () -> BeanMirror.of(Object.class, null));
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Class<?>)null, null));
-    }
-
-    @Test
-    void legalAccess() throws Exception {
-        System.out.println("Running legalAccess");
-        Client.legalAccess();
-    }
-
-    @Test
-    void unauthorizedAccess() throws Exception {
-        System.out.println("Running unauthorizedAccess");
-        Client.unauthorizedAccess();
-        // final var exception = assertThrows(RuntimeException.class, Client::unauthorizedAccess);
     }
 }

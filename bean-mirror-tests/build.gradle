@@ -1,8 +1,41 @@
+dependencies {
+
+    /* Bean Mirror. */
+    testCompile project(":bean-mirror-core")
+
+    /* Performance benchmark tool. */
+    compile "org.openjdk.jmh:jmh-core:$jmhVersion"
+    annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+
+    /* Test runner. */
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+}
+
+ext.moduleName = 'com.github.elopteryx.reflect.tests'
+
+compileTestJava {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
+        ]
+        classpath = files()
+    }
+}
+
+tasks.withType(Test) {
+    scanForTestClasses = false
+    include "**/*Test.class" // whatever Ant pattern matches your test class files
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
             groupId "com.github.elopteryx"
-            artifactId "bean-mirror-tests"
+            artifactId "bean-mirror-tests-runner"
 
             from components.java
         }

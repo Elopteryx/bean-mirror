@@ -2,8 +2,4 @@ rootProject.name = 'bean-mirror-parent'
 
 include 'bean-mirror-core'
 include 'bean-mirror-tests'
-include 'bean-mirror-tests:server'
-include 'bean-mirror-tests:server-unrestricted'
-include 'bean-mirror-tests:client'
-include 'bean-mirror-tests:runner'
 
