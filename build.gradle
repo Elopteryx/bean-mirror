@@ -28,8 +28,8 @@ subprojects {
     }
 
     ext {
-        jmhVersion = '1.20'
-        junitVersion = '5.1.0'
+        jmhVersion = '1.21'
+        junitVersion = '5.2.0'
     }
 
     tasks.withType(JavaCompile) {
