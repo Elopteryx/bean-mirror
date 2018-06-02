@@ -68,6 +68,8 @@ subprojects {
 
     artifacts {
         archives jar
+        archives sourcesJar
+        archives javadocJar
     }
 
     jacoco {
@@ -75,7 +77,7 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion '8.8'
+        toolVersion '8.10.1'
         configFile = new File("${project.rootDir}/config/checkstyle/checkstyle.xml")
     }
 
@@ -113,8 +115,8 @@ task jacocoRootReport(type: JacocoReport, group: "Coverage reports") {
     executionData = files(subprojects.jacocoTestReport.executionData)
 
     reports {
-        html.enabled true
-        xml.enabled true
+        html.enabled = true
+        xml.enabled = true
     }
 
     doFirst {
