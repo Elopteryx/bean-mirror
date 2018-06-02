@@ -1,6 +1,7 @@
 package com.github.elopteryx.reflect.tests;
 
 import com.github.elopteryx.reflect.BeanMirror;
+import com.github.elopteryx.reflect.BeanMirrorException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodHandles;
@@ -60,6 +61,13 @@ class ClassMirrorTest {
         assertNotNull(BeanMirror.of(GetField.class, lookup).getStatic("a", String.class));
     }
 
+    @Test
+    void getMissingStaticField() {
+        final var exception = assertThrows(BeanMirrorException.class,
+                () -> BeanMirror.of(GetField.class, lookup).getStatic("b", String.class));
+        assertEquals(NoSuchFieldException.class, exception.getCause().getClass());
+    }
+
     @SuppressWarnings("unused")
     private static class SetField {
         private static String a = "a";
@@ -70,6 +78,13 @@ class ClassMirrorTest {
         final var mirror = BeanMirror.of(SetField.class, lookup);
         final var mirrorAfterSet = mirror.setStatic("a", "b");
         assertEquals(mirror, mirrorAfterSet);
+    }
+
+    @Test
+    void setMissingStaticField() {
+        final var exception = assertThrows(BeanMirrorException.class,
+                () -> BeanMirror.of(GetField.class, lookup).getStatic("b", String.class));
+        assertEquals(NoSuchFieldException.class, exception.getCause().getClass());
     }
 
     @SuppressWarnings("unused")
@@ -212,6 +227,13 @@ class ClassMirrorTest {
         assertEquals(exception.getCause().getClass(), NullPointerException.class);
     }
 
+    @Test
+    void runStaticMissing() {
+        final var exception = assertThrows(BeanMirrorException.class,
+                () -> BeanMirror.of(RunTarget.class, lookup).runStatic("runThis", (String) null));
+        assertEquals(NoSuchMethodException.class, exception.getCause().getClass());
+    }
+
     @SuppressWarnings("unused")
     private static class CallTarget {
 
@@ -224,6 +246,13 @@ class ClassMirrorTest {
     void callStatic() {
         final var mirror = BeanMirror.of(CallTarget.class, lookup);
         assertEquals(mirror.callStatic(String.class, "call").get(), "callable");
+    }
+
+    @Test
+    void callStaticMissing() {
+        final var exception = assertThrows(BeanMirrorException.class,
+                () -> BeanMirror.of(CallTarget.class, lookup).callStatic(String.class, "callThis"));
+        assertEquals(NoSuchMethodException.class, exception.getCause().getClass());
     }
 
     private static class StandardObjectMethods {}

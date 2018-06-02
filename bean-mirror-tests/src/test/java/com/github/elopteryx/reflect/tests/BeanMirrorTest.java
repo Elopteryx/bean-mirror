@@ -1,6 +1,7 @@
 package com.github.elopteryx.reflect.tests;
 
 import com.github.elopteryx.reflect.BeanMirror;
+import com.github.elopteryx.reflect.BeanMirrorException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodHandles;
@@ -9,6 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BeanMirrorTest {
+
+    @Test
+    void createBeanMirror() {
+        final var exception = assertThrows(BeanMirrorException.class,
+                () -> BeanMirror.of(BeanMirror.class, MethodHandles.lookup()).create());
+        assertEquals(UnsupportedOperationException.class, exception.getCause().getCause().getClass());
+    }
 
     @Test
     void createNewObjectMirror() {

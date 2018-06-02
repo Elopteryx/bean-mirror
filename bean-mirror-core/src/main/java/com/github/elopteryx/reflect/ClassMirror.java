@@ -118,7 +118,7 @@ public final class ClassMirror<T> {
             final var varHandle = privateLookup.findStaticVarHandle(clazz, fieldName, fieldType);
             return varHandle.get();
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new BeanMirrorException(e);
         }
     }
 
@@ -128,7 +128,7 @@ public final class ClassMirror<T> {
             final var handle = privateLookup.findStaticVarHandle(clazz, name, value.getClass());
             handle.set(value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new BeanMirrorException(e);
         }
     }
 
@@ -204,6 +204,8 @@ public final class ClassMirror<T> {
         try {
             runOrCallMethod(void.class, name, args);
             return this;
+        } catch (BeanMirrorException e) {
+            throw e;
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -224,6 +226,8 @@ public final class ClassMirror<T> {
             final var result = runOrCallMethod(clazz, name, args);
             Objects.requireNonNull(result, "The value returned from the method call is null!");
             return new ObjectMirror<>(clazz.cast(result), null, lookup);
+        } catch (BeanMirrorException e) {
+            throw e;
         } catch (Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }

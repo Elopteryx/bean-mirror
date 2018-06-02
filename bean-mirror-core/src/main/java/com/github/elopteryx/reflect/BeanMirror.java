@@ -11,6 +11,11 @@ import java.util.Objects;
  */
 public final class BeanMirror {
 
+    private BeanMirror() {
+        // No need to instantiate.
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Creates a new mirror instance, wrapping the given object.
      * @param object The object to be wrapped
