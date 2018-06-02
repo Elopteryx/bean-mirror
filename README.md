@@ -16,6 +16,7 @@ Features
 * Fluent API
 * Type-safe
 * Modularized
+* Lightweight, no dependencies
 
 Requirements
 --------
@@ -35,3 +36,51 @@ from the existing ones).
 Because of the new Java release schedule this library is compiled to version 10 and newer versions are
 expected to be compiled to 11 when it comes out. After that, as Java 11 will be on long-term support the
 library should also stay on that.
+
+Examples
+--------
+
+```java
+
+        // Get the name of the school principal by field access
+        final String principalName = BeanMirror.of(school, MethodHandles.lookup())
+                .field("principal", Principal.class)
+                .get("name", String.class);
+
+```
+
+```java
+
+        // Create a setter function to set the value on any instance
+        final BiConsumer<Student, Integer> setter = BeanMirror.of(Student.class, MethodHandles.lookup())
+                .createSetter("startingYear", Integer.class);
+
+        setter.accept(student, 2018);
+        setter.accept(otherStudent, 2020);
+
+```
+
+Documentation
+-------------
+
+[Javadoc][1]
+
+Gradle
+-----
+```xml
+compile 'com.github.elopteryx:bean-mirror:1.0.0'
+```
+
+Maven
+-----
+```xml
+<dependency>
+    <groupId>com.github.elopteryx</groupId>
+    <artifactId>bean-mirror</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+Find available versions on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.elopteryx%22%20AND%20a%3A%22bean-mirror%22).
+
+[1]: http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror/1.0.0
