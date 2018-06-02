@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -252,22 +253,9 @@ public final class ClassMirror<T> {
         }
     }
 
-    /**
-     * First public methods are searched in the class hierarchy, then private
-     * methods on the declaring class. If a method could be found, it is
-     * returned, otherwise a {@code NoSuchMethodException} is thrown.
-     */
     private MethodHandle similarMethod(Lookup lookup, String name, Class<?>[] types) throws NoSuchMethodException, IllegalAccessException {
-        // first priority: find a public method with a "similar" signature in class hierarchy
-        // similar interpreted in when primitive argument types are converted to their wrappers
         for (var method : clazz.getMethods()) {
-            if (isSimilarSignature(method, name, types)) {
-                return lookup.unreflect(method);
-            }
-        }
-        // second priority: find a non-public method with a "similar" signature on declaring class
-        for (var method : clazz.getDeclaredMethods()) {
-            if (isSimilarSignature(method, name, types)) {
+            if (Modifier.isStatic(method.getModifiers()) && isSimilarSignature(method, name, types)) {
                 return lookup.unreflect(method);
             }
         }

@@ -7,6 +7,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -293,24 +294,16 @@ public final class ObjectMirror<T> {
         return lookup.unreflect(similarMethod(name, types));
     }
 
-    /**
-     * First public methods are searched in the class hierarchy, then private
-     * methods on the declaring class. If a method could be found, it is
-     * returned, otherwise a {@code NoSuchMethodException} is thrown.
-     */
     private Method similarMethod(String name, Class<?>[] types) throws NoSuchMethodException {
         final var type = type();
 
-        // first priority: find a public method with a "similar" signature in class hierarchy
-        // similar interpreted in when primitive argument types are converted to their wrappers
         for (var method : type.getMethods()) {
-            if (isSimilarSignature(method, name, types)) {
+            if (!Modifier.isStatic(method.getModifiers()) && isSimilarSignature(method, name, types)) {
                 return method;
             }
         }
-        // second priority: find a non-public method with a "similar" signature on declaring class
         for (var method : type.getDeclaredMethods()) {
-            if (isSimilarSignature(method, name, types)) {
+            if (!Modifier.isStatic(method.getModifiers()) && isSimilarSignature(method, name, types)) {
                 return method;
             }
         }
