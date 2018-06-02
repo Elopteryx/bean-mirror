@@ -109,6 +109,9 @@ repositories {
 }
 
 task jacocoMerge(type: JacocoMerge) {
+    subprojects.each { subproject ->
+        executionData subproject.tasks.withType(Test)
+    }
     doFirst {
         executionData = files(executionData.findAll { it.exists() })
     }
