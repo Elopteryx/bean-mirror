@@ -135,9 +135,9 @@ public final class ClassMirror<T> {
 
     /**
      * Creates a new function which can be used to get the value of
-     * field for the object given to the function. The first generic
-     * type will be the same as the current type, the second type will
-     * be the same as the given class type.
+     * field for the object given to the function. The input
+     * type will be the same as the current type, the output type will
+     * be the same as the given field class type.
      * @param name The name of the field
      * @param clazz The type for the field
      * @param <R> The generic type
@@ -164,9 +164,9 @@ public final class ClassMirror<T> {
 
     /**
      * Creates a new bi-consumer which can be used to set the value of
-     * field for the object given to the function. The first generic
-     * type will be the same as the current type, the second type will
-     * be the same as the given class type.
+     * field for the object given to the function. The first input
+     * type will be the same as the current type, the output type will
+     * be the same as the given field class type.
      * @param name The name of the field
      * @param clazz The type for the field
      * @param <R> The generic type
@@ -179,7 +179,7 @@ public final class ClassMirror<T> {
 
     /**
      * Creates a new consumer which can be used to set the value of
-     * the static field for the current type. The generic
+     * the static field for the current type. The input
      * type will be the same as the given class type.
      * @param name The name of the field
      * @param clazz The type for the field
