@@ -8,6 +8,7 @@ group: edge
 
 jdk:
   - oraclejdk10
+  - oraclejdk-ea
 
 cache:
   directories:
