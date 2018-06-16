@@ -1,5 +1,9 @@
 package com.github.elopteryx.reflect;
 
+import static com.github.elopteryx.reflect.internal.Utils.isSimilarSignature;
+import static com.github.elopteryx.reflect.internal.Utils.types;
+import static java.lang.invoke.MethodType.methodType;
+
 import com.github.elopteryx.reflect.internal.Functional;
 
 import java.lang.invoke.MethodHandle;
@@ -13,10 +17,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.github.elopteryx.reflect.internal.Utils.isSimilarSignature;
-import static com.github.elopteryx.reflect.internal.Utils.types;
-import static java.lang.invoke.MethodType.methodType;
 
 /**
  * A class based accessor. Works with a given

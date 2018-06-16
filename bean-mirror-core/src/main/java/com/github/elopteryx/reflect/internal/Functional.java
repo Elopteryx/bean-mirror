@@ -1,5 +1,7 @@
 package com.github.elopteryx.reflect.internal;
 
+import static com.github.elopteryx.reflect.internal.Utils.wrapper;
+
 import com.github.elopteryx.reflect.BeanMirrorException;
 
 import java.lang.invoke.MethodHandles;
@@ -9,8 +11,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.elopteryx.reflect.internal.Utils.wrapper;
-
 public final class Functional {
 
     private Functional() {
@@ -18,6 +18,16 @@ public final class Functional {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Getter creator method used by both Mirror implementations.
+     * @param name The field name
+     * @param lookup The lookup used for access check
+     * @param targetType The class type
+     * @param returnType The field type
+     * @param <T> Generic param for the class
+     * @param <R> Generic param for the field
+     * @return A new function
+     */
     @SuppressWarnings("unchecked")
     public static <T, R> Function<T, R> createGetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
         try {
@@ -37,6 +47,16 @@ public final class Functional {
         }
     }
 
+    /**
+     * Static etter creator method used by both Mirror implementations.
+     * @param name The field name
+     * @param lookup The lookup used for access check
+     * @param targetType The class type
+     * @param returnType The field type
+     * @param <T> Generic param for the class
+     * @param <R> Generic param for the field
+     * @return A new supplier
+     */
     @SuppressWarnings("unchecked")
     public static <T, R> Supplier<R> createStaticGetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
         try {
@@ -56,6 +76,16 @@ public final class Functional {
         }
     }
 
+    /**
+     * Setter creator method used by both Mirror implementations.
+     * @param name The field name
+     * @param lookup The lookup used for access check
+     * @param targetType The class type
+     * @param returnType The field type
+     * @param <T> Generic param for the class
+     * @param <R> Generic param for the field
+     * @return A new bi-consumer
+     */
     @SuppressWarnings("unchecked")
     public static <T, R> BiConsumer<T, R> createSetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
         try {
@@ -74,6 +104,16 @@ public final class Functional {
         }
     }
 
+    /**
+     * Static setter creator method used by both Mirror implementations.
+     * @param name The field name
+     * @param lookup The lookup used for access check
+     * @param targetType The class type
+     * @param returnType The field type
+     * @param <T> Generic param for the class
+     * @param <R> Generic param for the field
+     * @return A new consumer
+     */
     @SuppressWarnings("unchecked")
     public static <T, R> Consumer<R> createStaticSetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
         try {

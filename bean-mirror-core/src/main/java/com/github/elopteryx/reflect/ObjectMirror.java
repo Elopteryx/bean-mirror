@@ -1,5 +1,9 @@
 package com.github.elopteryx.reflect;
 
+import static com.github.elopteryx.reflect.internal.Utils.isSimilarSignature;
+import static com.github.elopteryx.reflect.internal.Utils.types;
+import static com.github.elopteryx.reflect.internal.Utils.wrapper;
+
 import com.github.elopteryx.reflect.internal.Functional;
 
 import java.lang.invoke.MethodHandle;
@@ -14,10 +18,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.github.elopteryx.reflect.internal.Utils.isSimilarSignature;
-import static com.github.elopteryx.reflect.internal.Utils.types;
-import static com.github.elopteryx.reflect.internal.Utils.wrapper;
 
 /**
  * An object based accessor. Works with the
@@ -72,15 +72,6 @@ public final class ObjectMirror<T> {
     }
 
     /**
-     * Returns the current value.
-     * @return The current value
-     */
-    @SuppressWarnings("unchecked")
-    public T get() {
-        return object;
-    }
-
-    /**
      * Returns the type of the current value or its super type
      * if it was supplied.
      * @return The type to be used
@@ -90,6 +81,15 @@ public final class ObjectMirror<T> {
             return superType;
         }
         return object.getClass();
+    }
+
+    /**
+     * Returns the current value.
+     * @return The current value
+     */
+    @SuppressWarnings("unchecked")
+    public T get() {
+        return object;
     }
 
     // FIELD

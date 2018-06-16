@@ -1,5 +1,8 @@
 package com.github.elopteryx.reflect.tests;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.github.elopteryx.reflect.BeanMirror;
 import com.github.elopteryx.reflect.tests.astype.Child;
 import com.github.elopteryx.reflect.tests.astype.GrandChild;
@@ -7,9 +10,6 @@ import com.github.elopteryx.reflect.tests.astype.Parent;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodHandles;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AsTypeTest {
 

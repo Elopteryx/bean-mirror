@@ -1,5 +1,12 @@
 package com.github.elopteryx.reflect.tests.internal;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.github.elopteryx.reflect.BeanMirror;
 import com.github.elopteryx.reflect.BeanMirrorException;
 import com.github.elopteryx.reflect.internal.NULL;
@@ -7,13 +14,6 @@ import com.github.elopteryx.reflect.internal.Utils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodHandles;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UtilsTest {
 

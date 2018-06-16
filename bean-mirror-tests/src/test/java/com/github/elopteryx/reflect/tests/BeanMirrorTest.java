@@ -1,13 +1,13 @@
 package com.github.elopteryx.reflect.tests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.github.elopteryx.reflect.BeanMirror;
 import com.github.elopteryx.reflect.BeanMirrorException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodHandles;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BeanMirrorTest {
 

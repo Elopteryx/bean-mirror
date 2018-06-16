@@ -37,6 +37,11 @@ public final class Utils {
         return true;
     }
 
+    /**
+     * Converts the given array of values to a new array of their types.
+     * @param values The object values
+     * @return The array of types
+     */
     public static Class<?>[] types(Object... values) {
         if (values == null) {
             return new Class[0];
