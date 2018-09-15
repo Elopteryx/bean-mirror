@@ -19,10 +19,11 @@ compileJava {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId "com.github.elopteryx"
-            artifactId "bean-mirror"
-
             from components.java
+            afterEvaluate {
+                groupId "com.github.elopteryx"
+                artifactId "bean-mirror"
+            }
         }
     }
 }
