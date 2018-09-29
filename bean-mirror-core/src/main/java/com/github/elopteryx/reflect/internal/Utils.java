@@ -17,7 +17,7 @@ public final class Utils {
      * @param actualTypes The parameter types
      * @return Whether the method matches the search
      */
-    public static boolean isSimilarSignature(Method candidateMethod, String methodName, Class<?>[] actualTypes) {
+    public static boolean isSimilarSignature(final Method candidateMethod, final String methodName, final Class<?>... actualTypes) {
         if (!candidateMethod.getName().equals(methodName)) {
             return false;
         }
@@ -42,7 +42,7 @@ public final class Utils {
      * @param values The object values
      * @return The array of types
      */
-    public static Class<?>[] types(Object... values) {
+    public static Class<?>[] types(final Object... values) {
         if (values == null) {
             return new Class[0];
         }
@@ -63,7 +63,7 @@ public final class Utils {
      * @param type The class type to be wrapped
      * @return The wrapped type, or null
      */
-    public static Class<?> wrapper(Class<?> type) {
+    public static Class<?> wrapper(final Class<?> type) {
         if (type == null) {
             return null;
         } else if (type.isPrimitive()) {

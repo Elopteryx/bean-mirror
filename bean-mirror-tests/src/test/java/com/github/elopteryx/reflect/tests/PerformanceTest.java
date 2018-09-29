@@ -14,8 +14,8 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -48,7 +48,7 @@ public class PerformanceTest {
     private static MethodHandle mh;
     private static Function<PerformanceTest, Integer> getter;
 
-    private static Map<String, Object> accessors = new HashMap<>();
+    private static Map<String, Object> accessors = new ConcurrentHashMap<>();
 
     static {
         try {
@@ -56,13 +56,13 @@ public class PerformanceTest {
             unReflect = MethodHandles.lookup().unreflectGetter(reflective);
             mh = MethodHandles.lookup().findGetter(PerformanceTest.class, "value", int.class);
 
-            var reflective2 = PerformanceTest.class.getDeclaredField("value2");
+            final var reflective2 = PerformanceTest.class.getDeclaredField("value2");
             accessors.put("value2", reflective2);
 
-            var mh3 = MethodHandles.lookup().unreflectGetter(PerformanceTest.class.getDeclaredField("value3"));
+            final var mh3 = MethodHandles.lookup().unreflectGetter(PerformanceTest.class.getDeclaredField("value3"));
             accessors.put("value3", mh3);
 
-            var mh4 = MethodHandles.lookup().findGetter(PerformanceTest.class, "value4", int.class);
+            final var mh4 = MethodHandles.lookup().findGetter(PerformanceTest.class, "value4", int.class);
             accessors.put("value4", mh4);
 
             getter = BeanMirror.of(new PerformanceTest(), MethodHandles.lookup()).createGetter("value", Integer.class);
@@ -72,9 +72,9 @@ public class PerformanceTest {
             static_unReflect = unReflect;
             static_mh = mh;
 
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (final IllegalAccessException | NoSuchFieldException e) {
             throw new IllegalStateException(e);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw new RuntimeException(e);
         }
     }

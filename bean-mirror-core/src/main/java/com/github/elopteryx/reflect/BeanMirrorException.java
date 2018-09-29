@@ -6,7 +6,11 @@ package com.github.elopteryx.reflect;
  */
 public class BeanMirrorException extends RuntimeException {
 
-    public BeanMirrorException(Throwable cause) {
+    /**
+     * Default constructor.
+     * @param cause The wrapped error
+     */
+    public BeanMirrorException(final Throwable cause) {
         super(cause);
     }
 

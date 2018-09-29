@@ -13,12 +13,12 @@ import java.lang.invoke.MethodHandles;
 
 class AsTypeTest {
 
-    private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     @Test
     void asTypeFieldWithTwoLevels() {
-        final var grandChildValue = BeanMirror.of(new GrandChild(), lookup).get("c", char.class);
-        final var childValue = BeanMirror.of(new GrandChild(), lookup).asType(Child.class).get("c", char.class);
+        final var grandChildValue = BeanMirror.of(new GrandChild(), LOOKUP).get("c", char.class);
+        final var childValue = BeanMirror.of(new GrandChild(), LOOKUP).asType(Child.class).get("c", char.class);
 
         assertAll(
                 () -> assertEquals('g', (char)grandChildValue),
@@ -27,8 +27,8 @@ class AsTypeTest {
 
     @Test
     void asTypeMethodWithTwoLevels() {
-        final var childValue = BeanMirror.of(new Child(), lookup).call(int.class, "call").get();
-        final var parentValue = BeanMirror.of(new Child(), lookup).asType(Parent.class).call(int.class, "call").get();
+        final var childValue = BeanMirror.of(new Child(), LOOKUP).call(int.class, "call").get();
+        final var parentValue = BeanMirror.of(new Child(), LOOKUP).asType(Parent.class).call(int.class, "call").get();
 
         assertAll(
                 () -> assertEquals(0, (int)parentValue),
@@ -37,9 +37,9 @@ class AsTypeTest {
 
     @Test
     void asTypeMethodWithThreeLevels() {
-        final var grandChildValue = BeanMirror.of(new GrandChild(), lookup).call(int.class, "call").get();
-        final var childValue = BeanMirror.of(new GrandChild(), lookup).asType(Child.class).call(int.class, "call").get();
-        final var parentValue = BeanMirror.of(new GrandChild(), lookup).asType(Parent.class).call(int.class, "call").get();
+        final var grandChildValue = BeanMirror.of(new GrandChild(), LOOKUP).call(int.class, "call").get();
+        final var childValue = BeanMirror.of(new GrandChild(), LOOKUP).asType(Child.class).call(int.class, "call").get();
+        final var parentValue = BeanMirror.of(new GrandChild(), LOOKUP).asType(Parent.class).call(int.class, "call").get();
 
         assertAll(
                 () -> assertEquals(0, (int)parentValue),

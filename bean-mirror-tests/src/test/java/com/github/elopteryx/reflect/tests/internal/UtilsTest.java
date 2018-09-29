@@ -22,9 +22,9 @@ class UtilsTest {
 
         private void empty() {}
 
-        private void run(int value) {}
+        private void run(final int value) {}
 
-        private void call(Boolean value) {}
+        private void call(final Boolean value) {}
 
     }
 
@@ -38,16 +38,16 @@ class UtilsTest {
     @Test
     void useIsSimilarSignature() throws Exception {
         final var emptyMethod = ParameterTypes.class.getDeclaredMethod("empty");
-        assertFalse(Utils.isSimilarSignature(emptyMethod, "empty_", new Class[0]));
-        assertFalse(Utils.isSimilarSignature(emptyMethod, "empty", new Class[]{Integer.class}));
+        assertFalse(Utils.isSimilarSignature(emptyMethod, "empty_"));
+        assertFalse(Utils.isSimilarSignature(emptyMethod, "empty", Integer.class));
 
         final var runMethod = ParameterTypes.class.getDeclaredMethod("run", int.class);
-        assertTrue(Utils.isSimilarSignature(runMethod, "run", new Class[]{Integer.class}));
-        assertFalse(Utils.isSimilarSignature(runMethod, "run", new Class[]{Long.class}));
+        assertTrue(Utils.isSimilarSignature(runMethod, "run", Integer.class));
+        assertFalse(Utils.isSimilarSignature(runMethod, "run", Long.class));
 
         final var callMethod = ParameterTypes.class.getDeclaredMethod("call", Boolean.class);
-        assertTrue(Utils.isSimilarSignature(callMethod, "call", new Class[]{Boolean.class}));
-        assertTrue(Utils.isSimilarSignature(callMethod, "call", new Class[]{boolean.class}));
+        assertTrue(Utils.isSimilarSignature(callMethod, "call", Boolean.class));
+        assertTrue(Utils.isSimilarSignature(callMethod, "call", boolean.class));
     }
 
     @Test

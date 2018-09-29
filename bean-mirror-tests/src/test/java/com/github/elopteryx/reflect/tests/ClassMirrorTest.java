@@ -14,7 +14,7 @@ import java.util.Objects;
 
 class ClassMirrorTest {
 
-    private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     private static class ForCreate {}
 
@@ -22,17 +22,17 @@ class ClassMirrorTest {
     private static class ForCreateWithParams {
         private final String value;
 
-        public ForCreateWithParams(String value) {
+        public ForCreateWithParams(final String value) {
             this.value = value;
         }
     }
 
     @Test
     void create() {
-        final var mirror = BeanMirror.of(ForCreate.class, lookup);
+        final var mirror = BeanMirror.of(ForCreate.class, LOOKUP);
         assertNotNull(mirror.create().get());
 
-        final var mirrorForParams = BeanMirror.of(ForCreateWithParams.class, lookup);
+        final var mirrorForParams = BeanMirror.of(ForCreateWithParams.class, LOOKUP);
         assertNotNull(mirrorForParams.create("").get());
     }
 
@@ -48,7 +48,7 @@ class ClassMirrorTest {
 
     @Test
     void getStatic() {
-        assertEquals(4, (int)BeanMirror.of(Child.class, lookup).getStatic("i", int.class));
+        assertEquals(4, (int)BeanMirror.of(Child.class, LOOKUP).getStatic("i", int.class));
     }
 
     @SuppressWarnings("unused")
@@ -58,13 +58,13 @@ class ClassMirrorTest {
 
     @Test
     void getStaticField() {
-        assertNotNull(BeanMirror.of(GetField.class, lookup).getStatic("a", String.class));
+        assertNotNull(BeanMirror.of(GetField.class, LOOKUP).getStatic("a", String.class));
     }
 
     @Test
     void getMissingStaticField() {
         final var exception = assertThrows(BeanMirrorException.class,
-                () -> BeanMirror.of(GetField.class, lookup).getStatic("b", String.class));
+                () -> BeanMirror.of(GetField.class, LOOKUP).getStatic("b", String.class));
         assertEquals(NoSuchFieldException.class, exception.getCause().getClass());
     }
 
@@ -75,7 +75,7 @@ class ClassMirrorTest {
 
     @Test
     void setStaticField() {
-        final var mirror = BeanMirror.of(SetField.class, lookup);
+        final var mirror = BeanMirror.of(SetField.class, LOOKUP);
         final var mirrorAfterSet = mirror.setStatic("a", "b");
         assertEquals(mirror, mirrorAfterSet);
     }
@@ -83,7 +83,7 @@ class ClassMirrorTest {
     @Test
     void setMissingStaticField() {
         final var exception = assertThrows(BeanMirrorException.class,
-                () -> BeanMirror.of(GetField.class, lookup).getStatic("b", String.class));
+                () -> BeanMirror.of(GetField.class, LOOKUP).getStatic("b", String.class));
         assertEquals(NoSuchFieldException.class, exception.getCause().getClass());
     }
 
@@ -94,7 +94,7 @@ class ClassMirrorTest {
 
     @Test
     void staticField() {
-        final var mirror = BeanMirror.of(FieldTarget.class, lookup);
+        final var mirror = BeanMirror.of(FieldTarget.class, LOOKUP);
         final var fieldMirror = mirror.staticField("inner", FieldTarget.class);
         assertEquals(fieldMirror.get(), FieldTarget.inner);
     }
@@ -107,7 +107,7 @@ class ClassMirrorTest {
             this("");
         }
 
-        private GetterSetterTarget(String value) {
+        private GetterSetterTarget(final String value) {
             this.value = value;
         }
 
@@ -118,7 +118,7 @@ class ClassMirrorTest {
 
     @Test
     void createGetter() {
-        final var getter = BeanMirror.of(GetterSetterTarget.class, lookup).createGetter("value", String.class);
+        final var getter = BeanMirror.of(GetterSetterTarget.class, LOOKUP).createGetter("value", String.class);
         assertAll(
                 () -> assertEquals(getter.apply(new GetterSetterTarget()), ""),
                 () -> assertEquals(getter.apply(new GetterSetterTarget("a")), "a"),
@@ -129,7 +129,7 @@ class ClassMirrorTest {
     @Test
     void createSetter() {
         final var target = new GetterSetterTarget();
-        final var setter = BeanMirror.of(GetterSetterTarget.class, lookup).createSetter("value", String.class);
+        final var setter = BeanMirror.of(GetterSetterTarget.class, LOOKUP).createSetter("value", String.class);
         assertAll(
                 () -> assertEquals("", target.getValue()),
                 () -> {
@@ -150,7 +150,7 @@ class ClassMirrorTest {
     @Test
     void createGetterAndSetter() {
         final var target = new GetterSetterTarget();
-        final var mirror = BeanMirror.of(target, lookup);
+        final var mirror = BeanMirror.of(target, LOOKUP);
         final var getter = mirror.createGetter("value", String.class);
         final var setter = mirror.createSetter("value", String.class);
         assertAll(
@@ -184,7 +184,7 @@ class ClassMirrorTest {
 
     @Test
     void createStaticGetterAndSetter() {
-        final var mirror = BeanMirror.of(GetterSetterTargetStatic.class, lookup);
+        final var mirror = BeanMirror.of(GetterSetterTargetStatic.class, LOOKUP);
         final var getter = mirror.createStaticGetter("value", String.class);
         final var setter = mirror.createStaticSetter("value", String.class);
         assertAll(
@@ -214,14 +214,14 @@ class ClassMirrorTest {
     @SuppressWarnings("unused")
     private static class RunTarget {
 
-        public static void run(String param) {
+        public static void run(final String param) {
             Objects.requireNonNull(param);
         }
     }
 
     @Test
     void runStatic() {
-        final var mirror = BeanMirror.of(RunTarget.class, lookup);
+        final var mirror = BeanMirror.of(RunTarget.class, LOOKUP);
         mirror.runStatic("run", "arg");
         final var exception = assertThrows(RuntimeException.class, () -> mirror.runStatic("run", (String) null));
         assertEquals(exception.getCause().getClass(), NullPointerException.class);
@@ -230,7 +230,7 @@ class ClassMirrorTest {
     @Test
     void runStaticMissing() {
         final var exception = assertThrows(BeanMirrorException.class,
-                () -> BeanMirror.of(RunTarget.class, lookup).runStatic("runThis", (String) null));
+                () -> BeanMirror.of(RunTarget.class, LOOKUP).runStatic("runThis", (String) null));
         assertEquals(NoSuchMethodException.class, exception.getCause().getClass());
     }
 
@@ -244,14 +244,14 @@ class ClassMirrorTest {
 
     @Test
     void callStatic() {
-        final var mirror = BeanMirror.of(CallTarget.class, lookup);
+        final var mirror = BeanMirror.of(CallTarget.class, LOOKUP);
         assertEquals(mirror.callStatic(String.class, "call").get(), "callable");
     }
 
     @Test
     void callStaticMissing() {
         final var exception = assertThrows(BeanMirrorException.class,
-                () -> BeanMirror.of(CallTarget.class, lookup).callStatic(String.class, "callThis"));
+                () -> BeanMirror.of(CallTarget.class, LOOKUP).callStatic(String.class, "callThis"));
         assertEquals(NoSuchMethodException.class, exception.getCause().getClass());
     }
 
@@ -259,20 +259,20 @@ class ClassMirrorTest {
 
     @Test
     void forHashCode() {
-        final var mirror = BeanMirror.of(StandardObjectMethods.class, lookup);
+        final var mirror = BeanMirror.of(StandardObjectMethods.class, LOOKUP);
         assertEquals(mirror.hashCode(), StandardObjectMethods.class.hashCode());
     }
 
     @Test
     void forEquals() {
-        final var mirror = BeanMirror.of(StandardObjectMethods.class, lookup);
-        final var otherMirror = BeanMirror.of(StandardObjectMethods.class, lookup);
+        final var mirror = BeanMirror.of(StandardObjectMethods.class, LOOKUP);
+        final var otherMirror = BeanMirror.of(StandardObjectMethods.class, LOOKUP);
         assertEquals(mirror, otherMirror);
     }
 
     @Test
     void forToString() {
-        final var mirror = BeanMirror.of(StandardObjectMethods.class, lookup);
+        final var mirror = BeanMirror.of(StandardObjectMethods.class, LOOKUP);
         assertEquals(mirror.toString(), StandardObjectMethods.class.toString());
     }
 }

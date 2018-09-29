@@ -22,7 +22,7 @@ public final class BeanMirror {
      * @param <T> The generic type
      * @return A new mirror instance
      */
-    public static <T> ObjectMirror<T> of(T object) {
+    public static <T> ObjectMirror<T> of(final T object) {
         return of(object, MethodHandles.lookup());
     }
 
@@ -33,7 +33,7 @@ public final class BeanMirror {
      * @param <T> The generic type
      * @return A new mirror instance
      */
-    public static <T> ObjectMirror<T> of(T object, Lookup lookup) {
+    public static <T> ObjectMirror<T> of(final T object, final Lookup lookup) {
         Objects.requireNonNull(object);
         Objects.requireNonNull(lookup);
         return new ObjectMirror<>(object, null, lookup);
@@ -45,7 +45,7 @@ public final class BeanMirror {
      * @param <T> The generic type
      * @return A new mirror instance
      */
-    public static <T> ClassMirror<T> of(Class<T> clazz) {
+    public static <T> ClassMirror<T> of(final Class<T> clazz) {
         return of(clazz, MethodHandles.lookup());
     }
 
@@ -56,7 +56,7 @@ public final class BeanMirror {
      * @param <T> The generic type
      * @return A new mirror instance
      */
-    public static <T> ClassMirror<T> of(Class<T> clazz, Lookup lookup) {
+    public static <T> ClassMirror<T> of(final Class<T> clazz, final Lookup lookup) {
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(lookup);
         return new ClassMirror<>(clazz, lookup);

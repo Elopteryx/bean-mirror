@@ -9,7 +9,6 @@ import com.github.elopteryx.reflect.internal.Functional;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
@@ -37,7 +36,7 @@ public final class ClassMirror<T> {
      */
     private final Lookup lookup;
 
-    ClassMirror(Class<T> clazz, Lookup lookup) {
+    ClassMirror(final Class<T> clazz, final Lookup lookup) {
         this.clazz = clazz;
         this.lookup = lookup;
     }
@@ -51,17 +50,16 @@ public final class ClassMirror<T> {
      * @return A new mirror instance, wrapping the created object
      */
     @SuppressWarnings("unchecked")
-    public ObjectMirror<T> create(Object... args)  {
-        final T result;
+    public ObjectMirror<T> create(final Object... args)  {
         try {
-            result = (T)useConstructor(args);
-        } catch (Throwable throwable) {
+            final T result = (T)useConstructor(args);
+            return new ObjectMirror<>(result, null, lookup);
+        } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
-        return new ObjectMirror<>(result, null, lookup);
     }
 
-    private Object useConstructor(Object... args) {
+    private Object useConstructor(final Object... args) {
         try {
             final var types = types(args);
 
@@ -70,7 +68,7 @@ public final class ClassMirror<T> {
             final var constructorHandle = privateLookup.findConstructor(clazz, methodType(void.class, types));
             return constructorHandle.invokeWithArguments(args);
 
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw new RuntimeException(e);
         }
     }
@@ -85,7 +83,7 @@ public final class ClassMirror<T> {
      * @return The value of the field
      */
     @SuppressWarnings("unchecked")
-    public <R> R getStatic(String name, Class<R> clazz) {
+    public <R> R getStatic(final String name, final Class<R> clazz) {
         return (R)getField(name, clazz);
     }
 
@@ -95,7 +93,7 @@ public final class ClassMirror<T> {
      * @param value The new value
      * @return The same mirror instance
      */
-    public ClassMirror<T> setStatic(String name, Object value) {
+    public ClassMirror<T> setStatic(final String name, final Object value) {
         setField(name, value);
         return this;
     }
@@ -107,28 +105,28 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new mirror instance, wrapping the field
      */
-    public <R> ObjectMirror<R> staticField(String name, Class<R> clazz) {
+    public <R> ObjectMirror<R> staticField(final String name, final Class<R> clazz) {
         final var result = getField(name, clazz);
         Objects.requireNonNull(result, "Field: " + name);
         return new ObjectMirror<>(clazz.cast(result), null, lookup);
     }
 
-    private Object getField(String fieldName, Class<?> fieldType) {
+    private Object getField(final String fieldName, final Class<?> fieldType) {
         try {
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
             final var varHandle = privateLookup.findStaticVarHandle(clazz, fieldName, fieldType);
             return varHandle.get();
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
             throw new BeanMirrorException(e);
         }
     }
 
-    private void setField(String name, Object value) {
+    private void setField(final String name, final Object value) {
         try {
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
             final var handle = privateLookup.findStaticVarHandle(clazz, name, value.getClass());
             handle.set(value);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
             throw new BeanMirrorException(e);
         }
     }
@@ -143,7 +141,7 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new Function
      */
-    public <R> Function<T, R> createGetter(String name, Class<R> clazz) {
+    public <R> Function<T, R> createGetter(final String name, final Class<R> clazz) {
         final var type = this.clazz;
         return Functional.createGetter(name, lookup, type, clazz);
     }
@@ -157,7 +155,7 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new Supplier
      */
-    public <R> Supplier<R> createStaticGetter(String name, Class<R> clazz) {
+    public <R> Supplier<R> createStaticGetter(final String name, final Class<R> clazz) {
         final var type = this.clazz;
         return Functional.createStaticGetter(name, lookup, type, clazz);
     }
@@ -172,7 +170,7 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new BiConsumer
      */
-    public <R> BiConsumer<T, R> createSetter(String name, Class<R> clazz) {
+    public <R> BiConsumer<T, R> createSetter(final String name, final Class<R> clazz) {
         final var type = this.clazz;
         return Functional.createSetter(name, lookup, type, clazz);
     }
@@ -186,7 +184,7 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new Consumer
      */
-    public <R> Consumer<R> createStaticSetter(String name, Class<R> clazz) {
+    public <R> Consumer<R> createStaticSetter(final String name, final Class<R> clazz) {
         final var type = this.clazz;
         return Functional.createStaticSetter(name, lookup, type, clazz);
     }
@@ -201,13 +199,13 @@ public final class ClassMirror<T> {
      * @param args The arguments which will be used for the invocation
      * @return The same mirror instance
      */
-    public ClassMirror<T> runStatic(String name, Object... args) {
+    public ClassMirror<T> runStatic(final String name, final Object... args) {
         try {
             runOrCallMethod(void.class, name, args);
             return this;
-        } catch (BeanMirrorException e) {
+        } catch (final BeanMirrorException e) {
             throw e;
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
@@ -222,39 +220,39 @@ public final class ClassMirror<T> {
      * @param <R> The generic type
      * @return A new mirror instance, wrapping the returned value
      */
-    public <R> ObjectMirror<R> callStatic(Class<R> clazz, String name, Object... args) {
+    public <R> ObjectMirror<R> callStatic(final Class<R> clazz, final String name, final Object... args) {
         try {
             final var result = runOrCallMethod(clazz, name, args);
             Objects.requireNonNull(result, "The value returned from the method call is null!");
             return new ObjectMirror<>(clazz.cast(result), null, lookup);
-        } catch (BeanMirrorException e) {
+        } catch (final BeanMirrorException e) {
             throw e;
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
 
-    private Object runOrCallMethod(Class<?> returnType, String name, Object... args) throws Throwable {
+    private Object runOrCallMethod(final Class<?> returnType, final String name, final Object... args) throws Throwable {
         final var methodHandle = findMethod(returnType, name, args);
         return methodHandle.invokeWithArguments(args);
     }
 
-    private MethodHandle findMethod(Class<?> returnType, String name, Object[] args) throws Throwable {
+    private MethodHandle findMethod(final Class<?> returnType, final String name, final Object... args) throws Throwable {
         final var types = types(args);
         final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
         try {
-            return privateLookup.findStatic(clazz, name, MethodType.methodType(returnType, types));
-        } catch (NoSuchMethodException e) {
+            return privateLookup.findStatic(clazz, name, methodType(returnType, types));
+        } catch (final NoSuchMethodException e) {
             try {
                 return similarMethod(lookup, name, types);
-            } catch (NoSuchMethodException e1) {
+            } catch (final NoSuchMethodException e1) {
                 throw new BeanMirrorException(e1);
             }
         }
     }
 
-    private MethodHandle similarMethod(Lookup lookup, String name, Class<?>[] types) throws NoSuchMethodException, IllegalAccessException {
-        for (var method : clazz.getMethods()) {
+    private MethodHandle similarMethod(final Lookup lookup, final String name, final Class<?>... types) throws NoSuchMethodException, IllegalAccessException {
+        for (final var method : clazz.getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) && isSimilarSignature(method, name, types)) {
                 return lookup.unreflect(method);
             }
@@ -268,7 +266,7 @@ public final class ClassMirror<T> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof ClassMirror && clazz.equals(((ClassMirror) obj).clazz);
     }
 

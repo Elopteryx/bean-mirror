@@ -1,10 +1,11 @@
 plugins {
     id 'com.github.ben-manes.versions' version '0.20.0'
-    id "com.github.kt3k.coveralls" version '2.8.2'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
+    id 'com.github.spotbugs' version '1.6.4'
 }
 
-apply plugin: "com.github.kt3k.coveralls"
-apply plugin: "jacoco"
+apply plugin: 'com.github.kt3k.coveralls'
+apply plugin: 'jacoco'
 
 task testReport(type: TestReport, group: 'Build') {
     description 'Generates an aggregate test report.'
@@ -19,8 +20,10 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'com.github.ben-manes.versions'
     apply plugin: 'com.github.kt3k.coveralls'
-    apply plugin: 'jacoco'
     apply plugin: 'checkstyle'
+    apply plugin: 'pmd'
+    apply plugin: 'com.github.spotbugs'
+    apply plugin: 'jacoco'
 
     group = 'com.github.elopteryx'
     version = '1.1.0-SNAPSHOT'
@@ -33,6 +36,11 @@ subprojects {
     ext {
         jmhVersion = '1.21'
         junitVersion = '5.3.1'
+
+        checkStyleVersion = '8.11'
+        pmdVersion = '6.7.0'
+        spotbugsVersion = '3.1.7'
+        jacocoVersion = '0.8.2'
     }
 
     tasks.withType(JavaCompile) {
@@ -58,7 +66,7 @@ subprojects {
                 docEncoding 'UTF-8'
                 failOnError true
                 links = [
-                        'https://docs.oracle.com/javase/10/docs/api/'
+                        'https://docs.oracle.com/en/java/javase/11/docs/api/'
                 ]
             }
         }
@@ -75,13 +83,25 @@ subprojects {
         archives javadocJar
     }
 
-    jacoco {
-        toolVersion '0.8.2'
+    checkstyle {
+        toolVersion = checkStyleVersion
+        configFile = new File("${projectDir}/../config/checkstyle/checkstyle.xml")
     }
 
-    checkstyle {
-        toolVersion '8.11'
-        configFile = new File("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    pmd {
+        toolVersion = pmdVersion
+        ruleSets = []
+        ruleSetConfig = resources.text.fromFile(file("${rootDir}/config/pmd/rulesSets.xml"))
+    }
+
+    spotbugs {
+        toolVersion = spotbugsVersion
+        effort = 'max'
+        sourceSets = [sourceSets.main]
+    }
+
+    jacoco {
+        toolVersion = jacocoVersion
     }
 
     signing {
@@ -108,8 +128,8 @@ repositories {
     jcenter()
 }
 
-task jacocoRootReport(type: JacocoReport, group: "Coverage reports") {
-    description "Generates an aggregate report from all subprojects"
+task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+    description 'Generates an aggregate report from all subprojects'
     dependsOn(subprojects.test)
 
     additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
@@ -133,9 +153,9 @@ coveralls {
 }
 
 tasks.coveralls {
-    group "Coverage reports"
-    description "Uploads the aggregated coverage report to Coveralls."
+    group 'Coverage reports'
+    description 'Uploads the aggregated coverage report to Coveralls.'
 
     dependsOn jacocoRootReport
-    onlyIf { System.env."CI" }
+    onlyIf { System.env.'CI' }
 }

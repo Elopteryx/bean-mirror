@@ -29,7 +29,7 @@ public final class Functional {
      * @return A new function
      */
     @SuppressWarnings("unchecked")
-    public static <T, R> Function<T, R> createGetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
+    public static <T, R> Function<T, R> createGetter(final String name, final MethodHandles.Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var field = targetType.getDeclaredField(name);
             final var modifiers = field.getModifiers();
@@ -42,7 +42,7 @@ public final class Functional {
             final var varHandle = lookupToUse.findVarHandle(targetType, name, returnType);
             final var classToUse = (Class<R>) wrapper(returnType);
             return obj -> classToUse.cast(varHandle.get(obj));
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
@@ -58,7 +58,7 @@ public final class Functional {
      * @return A new supplier
      */
     @SuppressWarnings("unchecked")
-    public static <T, R> Supplier<R> createStaticGetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
+    public static <T, R> Supplier<R> createStaticGetter(final String name, final MethodHandles.Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var field = targetType.getDeclaredField(name);
             final var modifiers = field.getModifiers();
@@ -71,7 +71,7 @@ public final class Functional {
             final var varHandle = lookupToUse.findStaticVarHandle(targetType, name, returnType);
             final var classToUse = (Class<R>) wrapper(returnType);
             return () -> classToUse.cast(varHandle.get());
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
@@ -87,7 +87,7 @@ public final class Functional {
      * @return A new bi-consumer
      */
     @SuppressWarnings("unchecked")
-    public static <T, R> BiConsumer<T, R> createSetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
+    public static <T, R> BiConsumer<T, R> createSetter(final String name, final MethodHandles.Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var field = targetType.getDeclaredField(name);
             final var modifiers = field.getModifiers();
@@ -99,7 +99,7 @@ public final class Functional {
             }
             final var varHandle = lookupToUse.findVarHandle(targetType, name, returnType);
             return (target, value) -> varHandle.set((T)target, (R)value);
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }
@@ -115,7 +115,7 @@ public final class Functional {
      * @return A new consumer
      */
     @SuppressWarnings("unchecked")
-    public static <T, R> Consumer<R> createStaticSetter(String name, MethodHandles.Lookup lookup, Class<T> targetType, Class<R> returnType) {
+    public static <T, R> Consumer<R> createStaticSetter(final String name, final MethodHandles.Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var field = targetType.getDeclaredField(name);
             final var modifiers = field.getModifiers();
@@ -127,7 +127,7 @@ public final class Functional {
             }
             final var varHandle = lookupToUse.findStaticVarHandle(targetType, name, returnType);
             return value -> varHandle.set((R)value);
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
     }

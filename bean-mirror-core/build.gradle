@@ -7,7 +7,7 @@ artifacts {
 }
 
 compileJava {
-    inputs.property("moduleName", moduleName)
+    inputs.property('moduleName', moduleName)
     doFirst {
         options.compilerArgs = [
                 '--module-path', classpath.asPath,
@@ -21,8 +21,8 @@ publishing {
         maven(MavenPublication) {
             from components.java
             afterEvaluate {
-                groupId "com.github.elopteryx"
-                artifactId "bean-mirror"
+                groupId 'com.github.elopteryx'
+                artifactId 'bean-mirror'
             }
         }
     }
@@ -35,44 +35,44 @@ uploadArchives {
                 MavenDeployment deployment -> signing.signPom(deployment)
             }
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
 
             pom.scopeMappings.with {
-                addMapping(1, configurations.compileOnly, "provided")
+                addMapping(1, configurations.compileOnly, 'provided')
             }
 
             pom.project {
-                name "Bean Mirror"
-                groupId "com.github.elopteryx"
-                artifactId "bean-mirror"
+                name 'Bean Mirror'
+                groupId 'com.github.elopteryx'
+                artifactId 'bean-mirror'
 
-                description "Bean Mirror is a reflection library."
-                url "https://github.com/Elopteryx/bean-mirror"
+                description 'Bean Mirror is a reflection library.'
+                url 'https://github.com/Elopteryx/bean-mirror'
 
                 scm {
-                    connection "scm:git:git@github.com/Elopteryx/bean-mirror.git"
-                    developerConnection "scm:git:git@github.com/Elopteryx/bean-mirror.git"
-                    url "scm:git:git@github.com/Elopteryx/bean-mirror.git"
+                    connection 'scm:git:git@github.com/Elopteryx/bean-mirror.git'
+                    developerConnection 'scm:git:git@github.com/Elopteryx/bean-mirror.git'
+                    url 'scm:git:git@github.com/Elopteryx/bean-mirror.git'
                 }
 
                 licenses {
                     license {
-                        name "The Apache License, Version 2.0"
-                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
 
                 developers {
                     developer {
-                        id "elopteryx"
-                        name "Adam Forgacs"
-                        email "creative.elopteryx@gmail.com"
+                        id 'elopteryx'
+                        name 'Adam Forgacs'
+                        email 'creative.elopteryx@gmail.com'
                     }
                 }
             }

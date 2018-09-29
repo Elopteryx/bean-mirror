@@ -1,7 +1,7 @@
 dependencies {
 
     /* Bean Mirror. */
-    testCompile project(":bean-mirror-core")
+    testCompile project(':bean-mirror-core')
 
     /* Performance benchmark tool. */
     compile "org.openjdk.jmh:jmh-core:$jmhVersion"
@@ -15,7 +15,7 @@ dependencies {
 
 tasks.withType(Test) {
     scanForTestClasses = false
-    include "**/*Test.class" // whatever Ant pattern matches your test class files
+    include '**/*Test.class' // whatever Ant pattern matches your test class files
 }
 
 publishing {
@@ -23,8 +23,8 @@ publishing {
         maven(MavenPublication) {
             from components.java
             afterEvaluate {
-                groupId "com.github.elopteryx"
-                artifactId "bean-mirror-tests-runner"
+                groupId 'com.github.elopteryx'
+                artifactId 'bean-mirror-tests-runner'
             }
         }
     }
