@@ -3,7 +3,6 @@ package com.github.elopteryx.reflect.tests.internal;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,7 +60,7 @@ class UtilsTest {
     @Test
     void useWrapper() {
         assertAll(
-                () -> assertNull(Utils.wrapper(null)),
+                () -> assertThrows(NullPointerException.class, () -> Utils.wrapper(null)),
                 () -> assertEquals(Utils.wrapper(Object.class), Object.class),
                 () -> assertEquals(Utils.wrapper(boolean.class), Boolean.class),
                 () -> assertEquals(Utils.wrapper(int.class), Integer.class),

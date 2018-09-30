@@ -61,12 +61,10 @@ public final class Utils {
      * Get a wrapper type for a primitive type, or the argument type itself, if
      * it is not a primitive type.
      * @param type The class type to be wrapped
-     * @return The wrapped type, or null
+     * @return The wrapped type
      */
     public static Class<?> wrapper(final Class<?> type) {
-        if (type == null) {
-            return null;
-        } else if (type.isPrimitive()) {
+        if (type.isPrimitive()) {
             if (boolean.class == type) {
                 return Boolean.class;
             } else if (int.class == type) {
