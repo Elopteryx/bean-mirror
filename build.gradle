@@ -5,11 +5,17 @@ plugins {
 }
 
 apply plugin: 'com.github.kt3k.coveralls'
-apply plugin: 'jacoco'
 
 task testReport(type: TestReport, group: 'Build') {
     description 'Generates an aggregate test report.'
     destinationDir file("${buildDir}/reports/allTests")
+}
+
+allprojects {
+    apply plugin: 'jacoco'
+    jacoco {
+        toolVersion = '0.8.2'
+    }
 }
 
 subprojects {
@@ -40,7 +46,6 @@ subprojects {
         checkStyleVersion = '8.11'
         pmdVersion = '6.7.0'
         spotbugsVersion = '3.1.7'
-        jacocoVersion = '0.8.2'
     }
 
     tasks.withType(JavaCompile) {
@@ -100,8 +105,22 @@ subprojects {
         sourceSets = [sourceSets.main]
     }
 
-    jacoco {
-        toolVersion = jacocoVersion
+    jacocoTestReport {
+        group = 'Coverage reports'
+        description = 'Generates a test coverage report for a project'
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+
+    task jacocoMerge(type: JacocoMerge) {
+        executionData tasks.withType(Test)
+
+        doFirst {
+            executionData = files(executionData.findAll { it.exists() })
+        }
     }
 
     signing {
@@ -116,11 +135,12 @@ subprojects {
 
     tasks.withType(Test) {
         rootProject.testReport.reportOn it
-        jacoco {
-            append true
-            destinationFile file("${rootDir}/build/jacoco/jacocoTest.exec")
-            classDumpDir file("${rootDir}/build/jacoco/classpathdumps")
-        }
+        it.dependsOn('jar')
+
+        // ensure tasks don't overwrite the default report directories used by the 'test' task
+        reports.html.destination = file("${buildDir}/reports/${name}")
+        reports.junitXml.destination = file("${buildDir}/reports/${name}/results")
+        binResultsDir = file("${buildDir}/reports/${name}/results/binary/${name}")
     }
 }
 
@@ -128,27 +148,32 @@ repositories {
     jcenter()
 }
 
-task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
-    description 'Generates an aggregate report from all subprojects'
-    dependsOn(subprojects.test)
-
-    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories = files(subprojects.sourceSets.main.output)
-    executionData = files(subprojects.jacocoTestReport.executionData)
-
-    reports {
-        html.enabled = true
-        xml.enabled = true
+task jacocoMerge(type: JacocoMerge) {
+    subprojects.each { subproject ->
+        executionData subproject.tasks.withType(Test)
     }
-
     doFirst {
         executionData = files(executionData.findAll { it.exists() })
     }
 }
 
+task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+    description 'Generates an aggregate report from all subprojects'
+    dependsOn subprojects.test, jacocoMerge
+
+    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories = files(subprojects.sourceSets.main.output)
+    executionData jacocoMerge.destinationFile
+
+    reports {
+        html.enabled = true
+        xml.enabled = true
+    }
+}
+
 coveralls {
-    sourceDirs = subprojects.sourceSets.main.allSource.srcDirs.flatten()
+    sourceDirs += subprojects.sourceSets.main.allSource.srcDirs.flatten()
     jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
 }
 
