@@ -5,7 +5,7 @@ Bean Mirror
 [![Build Status](https://travis-ci.org/Elopteryx/bean-mirror.svg?branch=master)](https://travis-ci.org/Elopteryx/bean-mirror)
 [![Coverage Status](https://coveralls.io/repos/github/Elopteryx/bean-mirror/badge.svg?branch=master)](https://coveralls.io/github/Elopteryx/bean-mirror?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.elopteryx/bean-mirror/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.elopteryx/bean-mirror)
-[![JavaDoc](https://img.shields.io/badge/javadoc-1.0.0-brightgreen.svg)](http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror)
+[![JavaDoc](https://img.shields.io/badge/javadoc-1.1.0-brightgreen.svg)](http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror)
 
 Bean Mirror is a fluent, type-safe reflection library for the latest Java versions.
 
@@ -18,7 +18,7 @@ Features
 
 Requirements
 --------
-* Java 10+
+* Java 11+
 
 Motivation
 --------
@@ -30,10 +30,6 @@ faster code if used properly, compared to the classic java.lang.reflect package.
 Because several additions have been added in Java 9 setting the minimum required Java version to anything
 lower is not feasible (it would not make sense to create another library, which would not be any different
 from the existing ones).
-
-Because of the new Java release schedule this library is compiled to version 10 and newer versions are
-expected to be compiled to 11 when it comes out. After that, as Java 11 will be on long-term support the
-library should also stay on that.
 
 Examples
 --------
@@ -66,7 +62,7 @@ Documentation
 Gradle
 -----
 ```xml
-compile 'com.github.elopteryx:bean-mirror:1.0.0'
+compile 'com.github.elopteryx:bean-mirror:1.1.0'
 ```
 
 Maven
@@ -75,10 +71,10 @@ Maven
 <dependency>
     <groupId>com.github.elopteryx</groupId>
     <artifactId>bean-mirror</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 Find available versions on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.elopteryx%22%20AND%20a%3A%22bean-mirror%22).
 
-[1]: http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror/1.0.0
+[1]: http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror/1.1.0
