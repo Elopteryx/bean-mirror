@@ -2,6 +2,7 @@ package com.github.elopteryx.reflect.tests;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.elopteryx.reflect.BeanMirror;
 import com.github.elopteryx.reflect.tests.astype.Child;
@@ -45,6 +46,11 @@ class AsTypeTest {
                 () -> assertEquals(0, (int)parentValue),
                 () -> assertEquals(1, (int)childValue),
                 () -> assertEquals(2, (int)grandChildValue));
+    }
+
+    @Test
+    void invalidType() {
+        assertThrows(IllegalArgumentException.class, () -> BeanMirror.of(new Exception()).asType(Error.class));
     }
 
 }

@@ -27,6 +27,13 @@ class BeanMirrorTest {
     }
 
     @Test
+    void createNewObjectMirrorWithoutLookup() {
+        final var object = new Object();
+        final var mirror = BeanMirror.of(object);
+        assertEquals(object, mirror.get());
+    }
+
+    @Test
     void createObjectMirrorWithNullParams() {
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Object)null));
         assertThrows(NullPointerException.class, () -> BeanMirror.of((Object)null, MethodHandles.lookup()));
@@ -38,6 +45,11 @@ class BeanMirrorTest {
     void createNewClassMirror() {
         final var lookup = MethodHandles.lookup();
         BeanMirror.of(Object.class, lookup);
+    }
+
+    @Test
+    void createNewClassMirrorWithoutLookup() {
+        BeanMirror.of(Object.class);
     }
 
     @Test
