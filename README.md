@@ -31,6 +31,9 @@ Because several additions have been added in Java 9 setting the minimum required
 lower is not feasible (it would not make sense to create another library, which would not be any different
 from the existing ones).
 
+The project was inspired by [jOOR](https://github.com/jOOQ/jOOR). If you are using an older Java I suggest
+using that instead.
+
 Examples
 --------
 
