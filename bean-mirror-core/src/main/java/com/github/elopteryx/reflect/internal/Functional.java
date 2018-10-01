@@ -72,7 +72,6 @@ public final class Functional {
      * @param <R> Generic param for the field
      * @return A new bi-consumer
      */
-    @SuppressWarnings("unchecked")
     public static <T, R> BiConsumer<T, R> createSetter(final String name, final Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var varHandle = getLookup(name, lookup, targetType).findVarHandle(targetType, name, returnType);
@@ -92,7 +91,6 @@ public final class Functional {
      * @param <R> Generic param for the field
      * @return A new consumer
      */
-    @SuppressWarnings("unchecked")
     public static <T, R> Consumer<R> createStaticSetter(final String name, final Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var varHandle = getLookup(name, lookup, targetType).findStaticVarHandle(targetType, name, returnType);
