@@ -222,7 +222,7 @@ class ClassMirrorTest {
     @Test
     void runStatic() {
         final var mirror = BeanMirror.of(RunTarget.class, LOOKUP);
-        mirror.runStatic("run", "arg");
+        mirror.runStatic("run", "arg1").runStatic("run", "arg2");
         final var exception = assertThrows(RuntimeException.class, () -> mirror.runStatic("run", (String) null));
         assertEquals(exception.getCause().getClass(), NullPointerException.class);
     }
