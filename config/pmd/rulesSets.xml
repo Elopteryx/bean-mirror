@@ -59,11 +59,6 @@
             <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration['.*Test']"/>
         </properties>
     </rule>
-    <rule ref="category/java/codestyle.xml/AvoidFinalLocalVariable">
-        <properties>
-            <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration['.Functional']"/>
-        </properties>
-    </rule>
     <rule ref="category/java/codestyle.xml/FieldNamingConventions">
         <properties>
             <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration['.PerformanceTest']"/>
