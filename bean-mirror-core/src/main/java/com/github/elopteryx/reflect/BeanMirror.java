@@ -18,12 +18,13 @@ public final class BeanMirror {
 
     /**
      * Creates a new mirror instance, wrapping the given object.
+     * The instance can only access public properties and methods.
      * @param object The object to be wrapped
      * @param <T> The generic type
      * @return A new mirror instance
      */
     public static <T> ObjectMirror<T> of(final T object) {
-        return of(object, MethodHandles.lookup());
+        return of(object, MethodHandles.publicLookup());
     }
 
     /**
@@ -41,12 +42,13 @@ public final class BeanMirror {
 
     /**
      * Creates a new mirror instance, wrapping the given class object.
+     * The instance can only access public properties and methods.
      * @param clazz The class to be wrapped
      * @param <T> The generic type
      * @return A new mirror instance
      */
     public static <T> ClassMirror<T> of(final Class<T> clazz) {
-        return of(clazz, MethodHandles.lookup());
+        return of(clazz, MethodHandles.publicLookup());
     }
 
     /**
