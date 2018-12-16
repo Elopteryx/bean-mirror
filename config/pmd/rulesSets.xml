@@ -30,6 +30,7 @@
         <exclude name="AvoidRethrowingException"/>
         <exclude name="AvoidThrowingRawExceptionTypes"/>
         <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
         <exclude name="TooManyMethods"/>
     </rule>
 
