@@ -29,7 +29,6 @@ subprojects {
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
     apply plugin: 'com.github.spotbugs'
-    apply plugin: 'jacoco'
 
     group = 'com.github.elopteryx'
     version = '1.2.0-SNAPSHOT'
@@ -41,10 +40,10 @@ subprojects {
 
     ext {
         jmhVersion = '1.21'
-        junitVersion = '5.4.2'
+        junitVersion = '5.5.0'
 
-        checkStyleVersion = '8.20'
-        pmdVersion = '6.14.0'
+        checkStyleVersion = '8.22'
+        pmdVersion = '6.16.0'
         spotbugsVersion = '3.1.12'
     }
 
