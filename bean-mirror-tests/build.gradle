@@ -1,31 +1,14 @@
 dependencies {
 
     /* Bean Mirror. */
-    testCompile project(':bean-mirror-core')
+    testImplementation(project(':bean-mirror-core'))
 
     /* Performance benchmark tool. */
-    compile "org.openjdk.jmh:jmh-core:$jmhVersion"
-    annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+    implementation("org.openjdk.jmh:jmh-core:$jmhVersion")
+    annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion")
 
     /* Test runner. */
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
-}
-
-tasks.withType(Test) {
-    scanForTestClasses = false
-    include '**/*Test.class' // whatever Ant pattern matches your test class files
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-            afterEvaluate {
-                groupId 'com.github.elopteryx'
-                artifactId 'bean-mirror-tests-runner'
-            }
-        }
-    }
 }
