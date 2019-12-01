@@ -267,7 +267,7 @@ public final class ClassMirror<T> {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof ClassMirror && clazz.equals(((ClassMirror) obj).clazz);
+        return obj instanceof ClassMirror && clazz.equals(((ClassMirror<?>) obj).clazz);
     }
 
     @Override

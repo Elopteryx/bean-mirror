@@ -87,7 +87,6 @@ public final class ObjectMirror<T> {
      * Returns the current value.
      * @return The current value
      */
-    @SuppressWarnings("unchecked")
     public T get() {
         return object;
     }
@@ -177,7 +176,6 @@ public final class ObjectMirror<T> {
      * @param <R> The generic type
      * @return A new Supplier
      */
-    @SuppressWarnings("unchecked")
     public <R> Supplier<R> createStaticGetter(final String name, final Class<R> clazz) {
         final var type = type();
         return Functional.createStaticGetter(name, lookup, type, clazz);
@@ -208,7 +206,6 @@ public final class ObjectMirror<T> {
      * @param <R> The generic type
      * @return A new Consumer
      */
-    @SuppressWarnings("unchecked")
     public <R> Consumer<R> createStaticSetter(final String name, final Class<R> clazz) {
         final var type = type();
         return Functional.createStaticSetter(name, lookup, type, clazz);
@@ -317,7 +314,7 @@ public final class ObjectMirror<T> {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof ObjectMirror && object.equals(((ObjectMirror) obj).object);
+        return obj instanceof ObjectMirror && object.equals(((ObjectMirror<?>) obj).object);
     }
 
     @Override
