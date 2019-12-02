@@ -1,6 +1,6 @@
 name: Bean Mirror CI
 
-on: [push]
+on: ["push", "pull_request"]
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
           java-version: ${{ matrix.java }}
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Upload coverage data
-        run: ./gradlew -Djdk.tls.client.protocols="TLSv1,TLSv1.1,TLSv1.2" coveralls
-        env:
-          CI: true
+      - name: Coveralls
+          uses: coverallsapp/github-action@master
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
