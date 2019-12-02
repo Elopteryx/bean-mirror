@@ -16,7 +16,10 @@ jobs:
           java-version: ${{ matrix.java }}
       - name: Build with Gradle
         run: ./gradlew build
+      - name: Create coverage report
+        run: ./gradlew jacocoRootReport
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
