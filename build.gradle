@@ -1,6 +1,6 @@
 plugins {
     id 'com.github.ben-manes.versions' version '0.28.0'
-    id 'com.github.kt3k.coveralls' version '2.10.0'
+    id 'com.github.kt3k.coveralls' version '2.10.1'
     id 'com.github.spotbugs' version '3.0.0'
 }
 
@@ -39,7 +39,7 @@ subprojects {
 
     ext {
         jmhVersion = '1.23'
-        junitVersion = '5.6.0'
+        junitVersion = '5.6.1'
 
         checkStyleVersion = '8.29'
         pmdVersion = '6.21.0'
