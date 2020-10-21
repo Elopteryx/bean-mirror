@@ -3,7 +3,7 @@ Bean Mirror
 
 [![Apache 2 License](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Actions Status](https://github.com/Elopteryx/bean-mirror/workflows/Bean%20Mirror%20CI/badge.svg)](https://github.com/Elopteryx/bean-mirror/actions)
-[![codecov](https://codecov.io/gh/Elopteryx/bean-mirror/branch/master/graph/badge.svg?token=7G1G0MMTOR)](undefined)
+[![codecov](https://codecov.io/gh/Elopteryx/bean-mirror/branch/master/graph/badge.svg?token=7G1G0MMTOR)](https://codecov.io/gh/Elopteryx/bean-mirror)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.elopteryx/bean-mirror/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.elopteryx/bean-mirror)
 [![JavaDoc](https://img.shields.io/badge/javadoc-1.1.0-brightgreen.svg)](http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror)
 
