@@ -1,15 +1,5 @@
 ext.moduleName = 'com.github.elopteryx.reflect'
 
-compileJava {
-    inputs.property('moduleName', moduleName)
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
-    }
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
