@@ -1,6 +1,6 @@
 plugins {
-    id 'com.github.ben-manes.versions' version '0.33.0'
-    id 'com.github.spotbugs' version '4.5.1'
+    id 'com.github.ben-manes.versions' version '0.38.0'
+    id 'com.github.spotbugs' version '4.7.0'
 }
 
 task testReport(type: TestReport, group: 'Build') {
@@ -34,12 +34,12 @@ subprojects {
     }
 
     ext {
-        jmhVersion = '1.26'
+        jmhVersion = '1.29'
         junitVersion = '5.7.0'
 
-        checkStyleVersion = '8.36.2'
-        pmdVersion = '6.28.0'
-        spotbugsVersion = '4.1.4'
+        checkStyleVersion = '8.41'
+        pmdVersion = '6.32.0'
+        spotbugsVersion = '4.2.2'
     }
 
     tasks.withType(JavaCompile) {
@@ -134,7 +134,7 @@ subprojects {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 task jacocoMerge(type: JacocoMerge) {
