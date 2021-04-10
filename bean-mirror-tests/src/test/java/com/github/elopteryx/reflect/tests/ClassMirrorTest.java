@@ -19,13 +19,7 @@ class ClassMirrorTest {
     private static class ForCreate {}
 
     @SuppressWarnings("unused")
-    private static class ForCreateWithParams {
-        private final String value;
-
-        public ForCreateWithParams(final String value) {
-            this.value = value;
-        }
-    }
+    private record ForCreateWithParams(String value) {}
 
     @Test
     void create() {
