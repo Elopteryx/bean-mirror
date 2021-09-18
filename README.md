@@ -5,7 +5,7 @@ Bean Mirror
 [![Actions Status](https://github.com/Elopteryx/bean-mirror/workflows/Bean%20Mirror%20CI/badge.svg)](https://github.com/Elopteryx/bean-mirror/actions)
 [![codecov](https://codecov.io/gh/Elopteryx/bean-mirror/branch/master/graph/badge.svg?token=7G1G0MMTOR)](https://codecov.io/gh/Elopteryx/bean-mirror)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.elopteryx/bean-mirror/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.elopteryx/bean-mirror)
-[![JavaDoc](https://img.shields.io/badge/javadoc-1.1.0-brightgreen.svg)](http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror)
+[![JavaDoc](https://img.shields.io/badge/javadoc-2.0.0-brightgreen.svg)](http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror)
 
 Bean Mirror is a fluent, type-safe reflection library for the latest Java versions.
 
@@ -18,7 +18,10 @@ Features
 
 Requirements
 --------
-* Java 11+
+| Versions    | Min JVM     |
+| ----------- | ----------- |
+| 2.0.0       | 17          |
+| 1.1.0       | 11          |
 
 Motivation
 --------
@@ -65,7 +68,7 @@ Documentation
 Gradle
 -----
 ```xml
-compile 'com.github.elopteryx:bean-mirror:1.1.0'
+compile 'com.github.elopteryx:bean-mirror:2.0.0'
 ```
 
 Maven
@@ -74,10 +77,10 @@ Maven
 <dependency>
     <groupId>com.github.elopteryx</groupId>
     <artifactId>bean-mirror</artifactId>
-    <version>1.1.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
 Find available versions on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.elopteryx%22%20AND%20a%3A%22bean-mirror%22).
 
-[1]: http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror/1.1.0
+[1]: http://www.javadoc.io/doc/com.github.elopteryx/bean-mirror/2.0.0

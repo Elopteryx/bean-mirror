@@ -25,6 +25,7 @@ class FunctionalTest {
 
         // private static int e;
 
+        @SuppressWarnings("PMD.MutableStaticState")
         public static int f;
 
     }
