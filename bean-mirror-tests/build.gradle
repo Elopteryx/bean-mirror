@@ -1,7 +1,11 @@
+plugins {
+    id 'jacoco-report-aggregation'
+}
+
 dependencies {
 
     /* Bean Mirror. */
-    testImplementation(project(':bean-mirror-core'))
+    implementation(project(':bean-mirror-core'))
 
     /* Performance benchmark tool. */
     implementation("org.openjdk.jmh:jmh-core:$jmhVersion")
@@ -11,4 +15,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
 }
