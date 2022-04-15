@@ -6,7 +6,7 @@ plugins {
 allprojects {
     apply plugin: 'jacoco'
     jacoco {
-        toolVersion = '0.8.7'
+        toolVersion = '0.8.8'
     }
 }
 
@@ -29,12 +29,12 @@ subprojects {
     }
 
     ext {
-        jmhVersion = '1.34'
+        jmhVersion = '1.35'
         junitVersion = '5.8.2'
 
-        checkStyleVersion = '10.0'
-        pmdVersion = '6.43.0'
-        spotbugsVersion = '4.5.3'
+        checkStyleVersion = '10.1'
+        pmdVersion = '6.44.0'
+        spotbugsVersion = '4.6.0'
     }
 
     tasks.withType(JavaCompile) {
@@ -70,7 +70,7 @@ subprojects {
 
     checkstyle {
         toolVersion = checkStyleVersion
-        configFile = new File("${projectDir}/../config/checkstyle/checkstyle.xml")
+        configFile = file("${projectDir}/../config/checkstyle/checkstyle.xml")
     }
 
     pmd {
