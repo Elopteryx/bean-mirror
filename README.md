@@ -18,10 +18,10 @@ Features
 
 Requirements
 --------
-| Versions    | Min JVM     |
-| ----------- | ----------- |
-| 2.0.0       | 17          |
-| 1.1.0       | 11          |
+| Versions | Min JVM |
+|----------|---------|
+| 2.0.0    | 17      |
+| 1.1.0    | 11      |
 
 Motivation
 --------
