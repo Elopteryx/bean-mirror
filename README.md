@@ -67,8 +67,8 @@ Documentation
 
 Gradle
 -----
-```xml
-compile 'com.github.elopteryx:bean-mirror:2.0.0'
+```gradle
+implementation 'com.github.elopteryx:bean-mirror:2.0.0'
 ```
 
 Maven
