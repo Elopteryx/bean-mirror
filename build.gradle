@@ -1,12 +1,12 @@
 plugins {
-    id 'com.github.ben-manes.versions' version '0.46.0'
-    id 'com.github.spotbugs' version '5.0.13'
+    id 'com.github.ben-manes.versions' version '0.47.0'
+    id 'com.github.spotbugs' version '5.0.14'
 }
 
 allprojects {
     apply plugin: 'jacoco'
     jacoco {
-        toolVersion = '0.8.8'
+        toolVersion = '0.8.10'
     }
 }
 
@@ -32,8 +32,8 @@ subprojects {
         jmhVersion = '1.36'
         junitVersion = '5.9.2'
 
-        checkStyleVersion = '10.7.0'
-        pmdVersion = '6.50.0'
+        checkStyleVersion = '10.12.1'
+        pmdVersion = '6.55.0'
         spotbugsVersion = '4.7.3'
     }
 

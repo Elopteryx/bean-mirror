@@ -26,7 +26,7 @@ import java.util.function.Function;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
-public class PerformanceTest {
+public class PerformanceBenchmark {
 
     private int value = 42;
 
@@ -41,31 +41,31 @@ public class PerformanceTest {
     private static final Field static_reflective;
     private static final MethodHandle static_unReflect;
     private static final MethodHandle static_mh;
-    private static final Function<PerformanceTest, Integer> static_getter;
+    private static final Function<PerformanceBenchmark, Integer> static_getter;
 
     private static Field reflective;
     private static MethodHandle unReflect;
     private static MethodHandle mh;
-    private static Function<PerformanceTest, Integer> getter;
+    private static Function<PerformanceBenchmark, Integer> getter;
 
     private static Map<String, Object> accessors = new ConcurrentHashMap<>();
 
     static {
         try {
-            reflective = PerformanceTest.class.getDeclaredField("value");
+            reflective = PerformanceBenchmark.class.getDeclaredField("value");
             unReflect = MethodHandles.lookup().unreflectGetter(reflective);
-            mh = MethodHandles.lookup().findGetter(PerformanceTest.class, "value", int.class);
+            mh = MethodHandles.lookup().findGetter(PerformanceBenchmark.class, "value", int.class);
 
-            final var reflective2 = PerformanceTest.class.getDeclaredField("value2");
+            final var reflective2 = PerformanceBenchmark.class.getDeclaredField("value2");
             accessors.put("value2", reflective2);
 
-            final var mh3 = MethodHandles.lookup().unreflectGetter(PerformanceTest.class.getDeclaredField("value3"));
+            final var mh3 = MethodHandles.lookup().unreflectGetter(PerformanceBenchmark.class.getDeclaredField("value3"));
             accessors.put("value3", mh3);
 
-            final var mh4 = MethodHandles.lookup().findGetter(PerformanceTest.class, "value4", int.class);
+            final var mh4 = MethodHandles.lookup().findGetter(PerformanceBenchmark.class, "value4", int.class);
             accessors.put("value4", mh4);
 
-            getter = BeanMirror.of(new PerformanceTest(), MethodHandles.lookup()).createGetter("value", Integer.class);
+            getter = BeanMirror.of(new PerformanceBenchmark(), MethodHandles.lookup()).createGetter("value", Integer.class);
             static_getter = getter;
 
             static_reflective = reflective;
@@ -86,12 +86,12 @@ public class PerformanceTest {
 
     @Benchmark
     public int dynamic_reflect_without_caching() throws IllegalAccessException, NoSuchFieldException {
-        return (int) PerformanceTest.class.getDeclaredField("value2").get(this);
+        return (int) PerformanceBenchmark.class.getDeclaredField("value2").get(this);
     }
 
     @Benchmark
     public int dynamic_mh_without_caching() throws Throwable {
-        return (int) MethodHandles.lookup().findGetter(PerformanceTest.class, "value2", int.class).invokeExact(this);
+        return (int) MethodHandles.lookup().findGetter(PerformanceBenchmark.class, "value2", int.class).invokeExact(this);
     }
 
     // WITHOUT MAP
