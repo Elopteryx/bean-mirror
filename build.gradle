@@ -1,12 +1,12 @@
 plugins {
-    id 'com.github.ben-manes.versions' version '0.47.0'
-    id 'com.github.spotbugs' version '5.0.14'
+    id 'com.github.ben-manes.versions' version '0.50.0'
+    id 'com.github.spotbugs' version '6.0.1'
 }
 
 allprojects {
     apply plugin: 'jacoco'
     jacoco {
-        toolVersion = '0.8.10'
+        toolVersion = '0.8.11'
     }
 }
 
@@ -29,12 +29,12 @@ subprojects {
     }
 
     ext {
-        jmhVersion = '1.36'
-        junitVersion = '5.9.2'
+        jmhVersion = '1.37'
+        junitVersion = '5.10.1'
 
-        checkStyleVersion = '10.12.1'
+        checkStyleVersion = '10.12.5'
         pmdVersion = '6.55.0'
-        spotbugsVersion = '4.7.3'
+        spotbugsVersion = '4.8.2'
     }
 
     tasks.withType(JavaCompile) {
@@ -82,7 +82,7 @@ subprojects {
 
     spotbugs {
         toolVersion = spotbugsVersion
-        effort = 'max'
+        effort = com.github.spotbugs.snom.Effort.valueOf('MAX')
     }
 
     spotbugsTest {
