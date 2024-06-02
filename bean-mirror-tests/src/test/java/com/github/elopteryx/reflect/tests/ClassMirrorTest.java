@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.elopteryx.reflect.BeanMirror;
 import com.github.elopteryx.reflect.BeanMirrorException;
@@ -19,15 +20,31 @@ class ClassMirrorTest {
     private static class ForCreate {}
 
     @SuppressWarnings("unused")
-    private record ForCreateWithParams(String value) {}
+    private record ForCreateWithOneParam(String d) {}
+
+    private record ForCreateWithParams(Integer a, Boolean b, Character c, String d) {}
+
+    private record ForCreateWithPrimitiveParams(int a, boolean b, char c, String d) {}
 
     @Test
     void create() {
         final var mirror = BeanMirror.of(ForCreate.class, LOOKUP);
         assertNotNull(mirror.create().get());
 
+        final var mirrorForOneParam = BeanMirror.of(ForCreateWithOneParam.class, LOOKUP);
+        final var createdParamRecord = mirrorForOneParam.create(" ").get();
+        assertNotNull(createdParamRecord);
+        assertTrue(createdParamRecord.getClass().isRecord());
+
         final var mirrorForParams = BeanMirror.of(ForCreateWithParams.class, LOOKUP);
-        assertNotNull(mirrorForParams.create("").get());
+        final var createdParamsRecord = mirrorForParams.create(1, true, ' ', " ").get();
+        assertNotNull(createdParamsRecord);
+        assertTrue(createdParamsRecord.getClass().isRecord());
+
+        final var mirrorForPrimitiveParams = BeanMirror.of(ForCreateWithPrimitiveParams.class, LOOKUP);
+        final var createdPrimitiveParamsRecord = mirrorForPrimitiveParams.create(new Class[]{ int.class, boolean.class, char.class, String.class }, 1, true, ' ', " ").get();
+        assertNotNull(createdPrimitiveParamsRecord);
+        assertTrue(createdPrimitiveParamsRecord.getClass().isRecord());
     }
 
     @SuppressWarnings("unused")

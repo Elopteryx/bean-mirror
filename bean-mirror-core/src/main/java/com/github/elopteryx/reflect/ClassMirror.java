@@ -52,7 +52,24 @@ public final class ClassMirror<T> {
     @SuppressWarnings("unchecked")
     public ObjectMirror<T> create(final Object... args)  {
         try {
-            final T result = (T)useConstructor(args);
+            final var result = (T) useConstructor(args);
+            return new ObjectMirror<>(result, null, lookup);
+        } catch (final Throwable throwable) {
+            throw new BeanMirrorException(throwable);
+        }
+    }
+
+    /**
+     * Creates a new instance from the current type. Returns it
+     * wrapped into the mirror.
+     * @param types The array of the constructor argument types
+     * @param args The constructor arguments
+     * @return A new mirror instance, wrapping the created object
+     */
+    @SuppressWarnings("unchecked")
+    public ObjectMirror<T> create(final Class<?>[] types, final Object... args)  {
+        try {
+            final var result = (T) useConstructor(types, args);
             return new ObjectMirror<>(result, null, lookup);
         } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
@@ -60,9 +77,12 @@ public final class ClassMirror<T> {
     }
 
     private Object useConstructor(final Object... args) {
-        try {
-            final var types = types(args);
+        final var types = types(args);
+        return useConstructor(types, args);
+    }
 
+    private Object useConstructor(final Class<?>[] types, final Object... args) {
+        try {
             final var privateLookup = MethodHandles.privateLookupIn(clazz, lookup);
 
             final var constructorHandle = privateLookup.findConstructor(clazz, methodType(void.class, types));
@@ -84,7 +104,7 @@ public final class ClassMirror<T> {
      */
     @SuppressWarnings("unchecked")
     public <R> R getStatic(final String name, final Class<R> clazz) {
-        return (R)getField(name, clazz);
+        return (R) getField(name, clazz);
     }
 
     /**
@@ -267,7 +287,7 @@ public final class ClassMirror<T> {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof ClassMirror && clazz.equals(((ClassMirror<?>) obj).clazz);
+        return obj instanceof ClassMirror<?> cm && clazz.equals(cm.clazz);
     }
 
     @Override

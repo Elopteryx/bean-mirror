@@ -65,7 +65,7 @@ public final class ObjectMirror<T> {
     @SuppressWarnings("unchecked")
     public <R> ObjectMirror<R> asType(final Class<R> clazz) {
         if (clazz.isAssignableFrom(object.getClass())) {
-            return new ObjectMirror<>((R)object, clazz, lookup);
+            return new ObjectMirror<>((R) object, clazz, lookup);
         } else {
             throw new IllegalArgumentException("Not a supertype!");
         }
@@ -102,7 +102,7 @@ public final class ObjectMirror<T> {
      */
     @SuppressWarnings("unchecked")
     public <R> R get(final String name, final Class<R> clazz) {
-        return (R)getField(name, clazz);
+        return (R) getField(name, clazz);
     }
 
     /**
@@ -314,7 +314,7 @@ public final class ObjectMirror<T> {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof ObjectMirror && object.equals(((ObjectMirror<?>) obj).object);
+        return obj instanceof ObjectMirror<?> om && object.equals(om.object);
     }
 
     @Override

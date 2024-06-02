@@ -75,7 +75,7 @@ public final class Functional {
     public static <T, R> BiConsumer<T, R> createSetter(final String name, final Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var varHandle = getLookup(name, lookup, targetType).findVarHandle(targetType, name, returnType);
-            return (target, value) -> varHandle.set((T)target, (R)value);
+            return (target, value) -> varHandle.set((T) target, (R) value);
         } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }
@@ -94,7 +94,7 @@ public final class Functional {
     public static <T, R> Consumer<R> createStaticSetter(final String name, final Lookup lookup, final Class<T> targetType, final Class<R> returnType) {
         try {
             final var varHandle = getLookup(name, lookup, targetType).findStaticVarHandle(targetType, name, returnType);
-            return value -> varHandle.set((R)value);
+            return value -> varHandle.set((R) value);
         } catch (final Throwable throwable) {
             throw new BeanMirrorException(throwable);
         }

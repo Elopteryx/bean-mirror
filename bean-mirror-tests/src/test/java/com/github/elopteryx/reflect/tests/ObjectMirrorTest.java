@@ -268,4 +268,15 @@ class ObjectMirrorTest {
         final var mirror = BeanMirror.of(object, LOOKUP);
         assertEquals(mirror.toString(), object.toString());
     }
+
+    private record Record(int a, boolean b, char c, String d) {}
+
+    @Test
+    void getFieldForRecord() {
+        final var record = new Record(1, true, ' ', " ");
+        assertNotNull(BeanMirror.of(record, LOOKUP).get("a", int.class));
+        assertNotNull(BeanMirror.of(record, LOOKUP).get("b", boolean.class));
+        assertNotNull(BeanMirror.of(record, LOOKUP).get("c", char.class));
+        assertNotNull(BeanMirror.of(record, LOOKUP).get("d", String.class));
+    }
 }
